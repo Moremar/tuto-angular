@@ -1,0 +1,36 @@
+<nav class="navbar navbar-expand-sm bg-light navbar-light" style="border-bottom: 1px solid grey">
+    <!-- Logo -->
+    <a href="#" class="navbar-brand">Recipe Book</a>
+
+    <!-- Collapsible button-->
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- Navbar links -->
+    <div class="collapse navbar-collapse" id="collapsibleNavbar">
+        <ul class="navbar-nav">
+            <li routerLinkActive="activeTab" class="nav-item">
+                <!-- <a class="nav-link" href="#" (click)="onRecipesClicked()">Recipes</a> -->
+                <a class="nav-link" [routerLink]="['recipes']">Recipes</a>
+            </li>
+            <li routerLinkActive="activeTab" class="nav-item">
+                <!-- <a class="nav-link" href="#" (click)="onShoppingListClicked()">Shopping List</a> -->
+                <a class="nav-link" [routerLink]="['shopping-list']">Shopping List</a>
+            </li>
+        </ul>
+
+        <!-- Dropdown -->
+        <ul class="navbar-nav ml-auto">
+            <li class="dropdown dropleft">
+                <!-- <a class="dropdown-toggle nav-link" data-toggle="dropdown" id="dropdownButtonNav" href="#">Manage</a> -->
+                <!-- if used without the bootstrap JS code, add our dropdown directive -->
+                <a appDropdown class="dropdown-toggle nav-link" data-toggle="dropdown" id="dropdownButtonNav" style="cursor:pointer;">Manage</a>
+                <div class="dropdown-menu" aria-labelledby="dropdownButtonNav">
+                    <div class="dropdown-item" style="cursor:pointer;" (click)="saveData()">Save Data</div>
+                    <div class="dropdown-item" style="cursor:pointer;" (click)="fetchData()">Fetch Data</div>
+                </div>
+            </li>
+        </ul>
+    </div>
+</nav>

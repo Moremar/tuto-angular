@@ -1,0 +1,9 @@
+<a class="list-group-item list-group-item-action" [routerLink]="[recipe.id]" routerLinkActive="active" style="width:100%; cursor: pointer">
+    <span class="float-right">
+        <img [src]="recipe.imagePath" alt="{{recipe.name}}" class="img-responsive" style="max-height: 50px"/>
+    </span>
+    <div>
+        <h4 class="list-group-item-heading">{{recipe.name}}</h4>
+        <span class="list-group-item-text"> {{recipe.description}}</span>
+    </div>
+</a>

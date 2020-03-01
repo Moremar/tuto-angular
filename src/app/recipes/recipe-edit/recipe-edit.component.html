@@ -1,0 +1,45 @@
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <form (ngSubmit)="onSubmit()" [formGroup]="myRecipeForm">
+                <div class="row form-group">
+                    <label class="col-form-label" for="recipeName"> Name </label>
+                    <input class="form-control" type="text" id="recipeName" formControlName="recipeName" />
+                </div>
+                <div class="row form-group">
+                    <label class="col-form-label" for="recipeImage"> Image </label>
+                    <input class="form-control" type="text" id="imagePath" formControlName="imagePath" #myImage />
+                </div>
+                <div class="row preview" *ngIf="myImage.value.length > 0">
+                    <img width="100" [src]="myImage.value" alt="Image not Found." />
+                </div>
+                <div class="row form-group">
+                    <label class="col-form-label" for="recipeDesc"> Description </label>
+                    <textarea class="form-control" type="text" id="description" formControlName="description"> </textarea>
+                </div>
+                <div class="row form-group">
+                    <label class="col-form-label"> Ingredients </label>
+                    <div formArrayName="ingredients">
+                        <div class="row" *ngFor="let ingControl of myRecipeForm.get('ingredients').controls; let i = index" [formGroupName]="i" style="margin-bottom: 5px;">
+                            <div class="col-md-7">
+                                <input type="text" class="form-control" formControlName="name" />
+                            </div>
+                            <div class="col-md-3">
+                                <input type="number" class="form-control" formControlName="amount" />
+                            </div>
+                            <div class="col-md-1">
+                                <button class="btn btn-sm btn-danger round" (click)="deleteIngredient(i)">X</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <button type="button" class="btn btn-success btn-sm" (click)="onAddIngredient()">Add Ingredient</button>
+                </div>
+                <hr />
+                <button class="btn btn-primary" type="submit" [disabled]="myRecipeForm.invalid">{{ buttonLabel }}</button>
+                <button class="btn btn-danger" type="button" (click)="onCancel()">Cancel</button>
+            </form>
+        </div>
+    </div>
+</div>
