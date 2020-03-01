@@ -16,19 +16,19 @@ export class RecipesService {
   private recipes: Recipe[] = [
     new Recipe(0,
         'Pate de campagne',
-        'La bonne vieille recette de grand-mere plus vielle que le monde !',
+        'Traditional french pork pate recipe !',
         '../../assets/images/pate-de-campagne.jpeg',
-        [ new Ingredient('Pain', 2), new Ingredient('Pate', 4) ]),
+        [ new Ingredient('Bread', 2), new Ingredient('Pate', 4) ]),
     new Recipe(1,
-        'Sandwich au poulet',
-        'Pain de campagne et poulet fermier !',
+        'Chicken Sandwich',
+        'Fresh baguette with delicious chicken slices !',
         '../../assets/images/chicken-sandwich.jpeg',
-        [ new Ingredient('Pain', 2), new Ingredient('Poulet', 1) ]),
+        [ new Ingredient('Bread', 2), new Ingredient('Chicken', 1) ]),
     new Recipe(2,
-        'Poulet roti',
-        'Un joli poulet avec ses petites patates !',
+        'Roasted Chicken',
+        'A full roasted chicken with small potatoes !',
          '../../assets/images/poulet-roti.jpg',
-         [ new Ingredient('Patates', 5), new Ingredient('Poulet', 1) ])
+         [ new Ingredient('Potatoes', 5), new Ingredient('Chicken', 1) ])
   ];
 
 
