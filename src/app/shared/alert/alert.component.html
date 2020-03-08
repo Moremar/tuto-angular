@@ -1,0 +1,10 @@
+<!-- backdrop to hide the background and disable it -->
+<div class="backdrop" (click)="onClose()"></div>
+
+<!-- modal div -->
+<div class="alert-box">
+    <p>{{ message }}</p>
+    <div class="alert-box-actions">
+        <button class="btn btn-primary" (click)="onClose()">OK</button>
+    </div>
+</div>

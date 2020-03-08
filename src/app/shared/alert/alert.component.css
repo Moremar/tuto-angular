@@ -1,0 +1,27 @@
+.backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    background: rgba(0, 0, 0, 0.75);  /* transaparent black */
+    z-index: 50;    /* above other elements */
+
+    /* view width/heigth to take all screen, not just the container */
+    width: 100vw;
+    height: 100vh;
+
+}
+
+.alert-box {
+    position: fixed;
+    top: 30vh;
+    left: 20vw;
+    width: 60vw;
+    padding: 15px;
+    z-index: 100;  /* above the backdrop */
+    background: #ffefef;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+.alert-box-actions {
+    float: right;
+}

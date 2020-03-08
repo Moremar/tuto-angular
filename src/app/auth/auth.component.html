@@ -1,3 +1,8 @@
+
+<!-- if we create dynamically a component, we can put this ng-template 
+    anywhere in this HTML (since it is displayed above everything) -->
+<ng-template appPlaceholder></ng-template>
+
 <div class="container">
     <div class="row">
 
@@ -5,6 +10,7 @@
             <app-spinner></app-spinner>
         </div>
 
+        <!-- if we want to use an error message in a div in the HTML (not a modal) -->
         <div *ngIf="errorMessage" class="alert alert-danger">
             <button type="button" class="close" aria-label="Close" (click)="onCloseAlert()">
                 <span aria-hidden="true">&times;</span>
@@ -12,6 +18,9 @@
             <h4>An error occured on the server.</h4>
             {{ errorMessage }}
         </div>
+
+        <!-- if we want to use *ngIf, we can insert the modal like this : -->
+        <!-- <app-alert [message]="errorMessage" *ngIf="errorMessage"></app-alert> -->
 
         <form *ngIf="!isLoading" (ngSubmit)="onLogin()" #authForm="ngForm">
             <p>Login to access your recipes.</p>

@@ -19,6 +19,8 @@ import { RecipeEditComponent } from './recipes/recipe-edit/recipe-edit.component
 import { AuthComponent } from './auth/auth.component';
 import { SpinnerComponent } from './shared/spinner.component';
 import { AuthInterceptor } from './auth/auth-interceptor.service';
+import { AlertComponent } from './shared/alert/alert.component';
+import { PlaceholderDirective } from './shared/placeholder.directive';
 
 /* If no custom routing module, add the routes here  */
 // const routes: Routes = [
@@ -42,7 +44,9 @@ import { AuthInterceptor } from './auth/auth-interceptor.service';
     SelectARecipeComponent,
     RecipeEditComponent,
     AuthComponent,
-    SpinnerComponent
+    SpinnerComponent,
+    AlertComponent,
+    PlaceholderDirective
   ],
   imports: [
     BrowserModule,
@@ -59,6 +63,10 @@ import { AuthInterceptor } from './auth/auth-interceptor.service';
     useClass: AuthInterceptor,
     multi: true
   }],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
+  // components that can be created dynamically from code
+  entryComponents: [
+    AlertComponent
+  ]
 })
 export class AppModule { }

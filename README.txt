@@ -1088,7 +1088,7 @@ AUTHENTICATION
 --------------
 
 Many apps use sessions for authentication.
-Session are objects created in the backend once the user enters his credentials.
+Session are an object that is created in the backend once the user enters his credentials.
 The backend then "knows" the client as long as the session is open.
 
 With Angular we cannot use this mechanism, since frontend and backend are totallyy decorrelated.
@@ -1096,7 +1096,7 @@ They only communicate via HTTP calls.
 
 In Angular, once the client sends the credentials, the backend will generate a token from them, 
 encode it with a secret key only the backend knows, and sends it to the Angular frontend.
-Every time the client sends a request that needs authentication, it will attach this token.
+Every time the client sends a request that needs authentication, it will attache this token.
 The backend will then validate that it is correct, and if it is accept to execute the request.
 
 The backend needs to have an HTTP endpoint to create a user, and to get a token for an existing user.
@@ -1107,7 +1107,7 @@ The Angular app must have a login form allowing the user to :
  - login with an existing account
  - log out
 
-It should then communicate with an Auth service that handles the sign up / log in / log out.
+It should then communicate with an Auth service that handles the sign up / log in / log off.
 
 If we want to store the auth token so that it is read when the page reloads, we need to use either
 cookies or local storage (an API controlled by the browser to store key/val pairs on the file system).
@@ -1119,10 +1119,62 @@ It can be read at startup and removed on logout with :
 localStorage.getItem('itemName');
 localStorage.removeItem('itemName');
 
-Note that when we use getItem(), all fields will be strings.
-We need to convert them into actual business objects (native Date objects, custom User object, ...).
-
 We can see the content of local storage in the Chrome dev tool (Application > Storage > Local Storage).
+
+
+DYNAMIC COMPONENTS
+------------------
+
+We can load some components dynamically in our app, to create some modals or popups for example.
+One way to do it is to use *ngIf on a component with a backdrop, and to set the condition in code to show/hide it.
+It is the easiest solution so it should be used when possible.
+
+A more complex approach is to create the component, attach it in the DOM and remove it from the DOM ourselves from code.
+
+We need a method in the TS code to instanciate our component.
+We cannot just use "new MyComponent()" because Angular needs more than just instantiation.
+
+We need to use an Angular Component factory.
+Inject the ComponentFactoryResolver in the constructor, then instantiate the component like :
+  const factory = this.componentFactoryResolver.resolveComponentFactory(MyComponent);
+ 
+This factory needs to know where to create the component, which is given by a view container ref.
+It is obtained by creating a directive, inject in it the "ViewContainerRef" and make it a public porperty of the directive.
+Doing so, we can set this property to a <ng-template> in the HTML and access its view container ref to create the component here.
+
+@Directive({
+  selector: '[appPlaceholder]'
+})
+export class PlaceholderDirective {
+  constructor(public viewContainerRef: ViewContainerRef) {}
+}
+
+Then create a <ng-template> element in the HTML of the component that will create the new component dynamically.
+It is better than a <div> because it does not actually create an element in the DOM, but can be referenced.
+Add the new directive to that element :
+  <ng-template appPlaceholder></ng-template>
+
+Then we can access the view container ref from the code with @ViewChild :
+  @ViewChild(PlaceholderDirective, {static: false}) errorModalTemplate: PlaceholderDirective;
+
+And use it to create a component dynamically :
+    const factory = this.factoryResolver.resolveComponentFactory(AlertComponent);
+    const viewContainerRef = this.errorModalTemplate.viewContainerRef;
+    viewContainerRef.clear();
+    const newComponentRef = viewContainerRef.createComponent(factory);
+
+For this to work, we need to let Angular know that this component will be created dynamically.
+This is done by registering it in the "entryComponents" property of the module :
+  entryComponents: [AlertComponent]
+
+Then we can set the input and output bindings by using the "instance" of the new component ref.
+    modalRef.instance.message = message;                              // input
+    this.modalCloseSub = modalRef.instance.close.subscribe(           // output close eventSubmitter
+      () => {
+        this.modalCloseSub.unsubscribe();
+        viewContainerRef.clear();
+      }
+    );
 
 
 Bonus JS : Observables
@@ -1184,7 +1236,7 @@ Like every Observable, the listener must unsubscribe in his OnDestroy hook.
 We should use them insted of EventEmitter for inter-components communication via a service,
 but it can not replace the EventEmitter in the @Output() Angular decorator.
 
-We can also use BehaviorSubject objects, similar to Subject but we can also receive the
+We can also use BehaviorSubject objects, that are similar to Subjects but we can access the
 last emitted value even if we subscribe after it was emitted.
     eventSubject = new BehaviorSubject<boolean>(null);
 
@@ -1196,7 +1248,7 @@ Bootstrap
 ---------
 
 Bootstrap offers a large selection of CSS classes to style our components easily.
-Install locally and save to package.json with :  
+Install locally and save to package,json with :  
 npm install --save bootstrap@3
 npm install --save jquery
 
@@ -1242,7 +1294,7 @@ Loading.io
 ----------
 
 A nice website offering some spinners (HTML and CSS).
-We can create an Angular spinner component by just copy/pasting the HTML and CSS code provided.
+We can create a component with this copy/pasted code to have a ready to use spinner component.
 
 
 Firebase
