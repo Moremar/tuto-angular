@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
-import { Recipe } from './recipe.model';
-import { Ingredient } from '../shared/ingredient.model';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
+
+import { Recipe } from './recipe.model';
+import { Ingredient } from '../shared/ingredient.model';
 
 @Injectable({
   providedIn: 'root'
@@ -11,7 +12,8 @@ import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http
 export class RecipesService {
 
   // must append ".json" to the endpoint for Firebase to know how to save it
-  private firebaseUrl = "https://myrecipes-4a862.firebaseio.com/recipes.json";
+  // the auth token is added to the request by the AuthInterceptor
+  private firebaseUrl = "https://myrecipes-6270c.firebaseio.com/recipes.json";
 
   private recipes: Recipe[] = [
     new Recipe(0,
@@ -34,6 +36,7 @@ export class RecipesService {
 
   // alert when the recipes changed, subscribe to it to react
   recipesChanged = new Subject<void>();
+
 
   constructor(private http: HttpClient) {}
 

@@ -960,35 +960,9 @@ HTTP requests are made of :
  - headers : content-type, ...
  - a body  : the data to send (for POST / PUT / PATCH)
 
-Firebase
---------
-
-In a real app, the backend can be in C++ / Java / Node / Python.
-To simulate the backend, we can use Firebase, a Google backend-as-a-service solution.
-It offers a lot of backend functionalities (authentication, database, storage, REST API).
-We will just use here the REST API to define HTTP endpoints for our Angular app.
-We will create a Firebase project, which is a container for several apps sharing backend (iOS / Android / web).
-A Firebase project is actually creating a Google Cloud Platform (GCP) project behind the scene.
-
-We will use Firebase Realtime database, it is a database that stores and gets objects directly via HTTP calls.
-When sending a POST, it is interpreted by Firebase to add an element in a folder of this database.
-
-- open the Firebase Console
-- Click "Create a Project" and give it a name ("myRecipes" in my example)
-- Once the project is created, we are on the overview dashboard of the project.
-- Go to Develop > Database > Create Real-time database (not Cloud Firestore)
-  Click "Set test mode" to allow anyone to do anything in the DB (later we will use authentication)
-
-Data tab:
-It creates a database and provides us with a base URL : https://mytest-4d456.firebaseio.com/
-We can execute HTTP requests on it, by adding a relative path at the end, for example :
-https://mytest-4d456.firebaseio.com/items.json
-NOTE : Firebase requires that we add the ".json" at the end to tell it the type.
-On a post, it will create a new element in the items folder with a unique ID (name).
-
-Rules tab:
-We can define the permission on read and write.
-Set the read permission to false to receive an error on any GET (to test error handling).
+Here we use a Firebase project so we do not need to write our own backend.
+Firebase gives us some endpoints to create/alter/delete objects.
+See at the end for more info about Firebase.
 
 
 Angular HTTP Module
@@ -1079,12 +1053,12 @@ An interceptor is a service implementing HttpInterceptor interface :
   export class AuthInterceptorService implements HttpInterceptor {
     intercept(req: HttpRequest<any>, next: HttpHandler) {
       // clone our HTTP request (req is immutable)
-      myReq = req.clone({ 
+      const myReq = req.clone({ 
           headers: req.headers.append(auth, XXXX'}),     // if we want to add headers
           url: '<another URL>'                           // if we want to change the URL
       })
       // call the handler (REQUIRED!)
-      next.handle(myReq);
+      return next.handle(myReq);
     }
   }
 
@@ -1109,6 +1083,46 @@ This pipe always receive an "event" response type (the most granular) :
       }));
     }
 
+
+AUTHENTICATION
+--------------
+
+Many apps use sessions for authentication.
+Session are objects created in the backend once the user enters his credentials.
+The backend then "knows" the client as long as the session is open.
+
+With Angular we cannot use this mechanism, since frontend and backend are totallyy decorrelated.
+They only communicate via HTTP calls.
+
+In Angular, once the client sends the credentials, the backend will generate a token from them, 
+encode it with a secret key only the backend knows, and sends it to the Angular frontend.
+Every time the client sends a request that needs authentication, it will attach this token.
+The backend will then validate that it is correct, and if it is accept to execute the request.
+
+The backend needs to have an HTTP endpoint to create a user, and to get a token for an existing user.
+We can use Firebase that provides this service out-of-the box without writing our own backend.
+
+The Angular app must have a login form allowing the user to :
+ - create an account
+ - login with an existing account
+ - log out
+
+It should then communicate with an Auth service that handles the sign up / log in / log out.
+
+If we want to store the auth token so that it is read when the page reloads, we need to use either
+cookies or local storage (an API controlled by the browser to store key/val pairs on the file system).
+
+To store with local storage we need to convert the object to store into a string :
+localStorage.setItem('itemName', JSON.stringify(myObject));
+
+It can be read at startup and removed on logout with :
+localStorage.getItem('itemName');
+localStorage.removeItem('itemName');
+
+Note that when we use getItem(), all fields will be strings.
+We need to convert them into actual business objects (native Date objects, custom User object, ...).
+
+We can see the content of local storage in the Chrome dev tool (Application > Storage > Local Storage).
 
 
 Bonus JS : Observables
@@ -1149,8 +1163,13 @@ this.route.params
 this.route.params
     .pipe(filter( (data) => { return (+data < 3); } ))
     .subscribe( (data) => { console.log(data); } )
-);
+); 
 
+- take(n) lets rxjs know that we want only n values from that observable.
+  once we received the desired number of values, it automatically unsubscribes.
+
+- catchError() that lets us process any error sent by the observable.
+  it should throwError(error) if it wants to forward the error 
 
 Subjects
 --------
@@ -1165,18 +1184,33 @@ Like every Observable, the listener must unsubscribe in his OnDestroy hook.
 We should use them insted of EventEmitter for inter-components communication via a service,
 but it can not replace the EventEmitter in the @Output() Angular decorator.
 
+We can also use BehaviorSubject objects, similar to Subject but we can also receive the
+last emitted value even if we subscribe after it was emitted.
+    eventSubject = new BehaviorSubject<boolean>(null);
 
 
-USEFUL LIBRARIES
-----------------
+USEFUL TOOLS
+------------
 
-- Bootstrap 3 (CSS components)
+Bootstrap
+---------
 
-  Install locally and save to package,json with :  npm install --save bootstrap@3
-  Then add to "styles" array in angular.json the CSS file (before styles.css) :
-  node_modules/bootstrap/dist/css/bootstrap.min.css
+Bootstrap offers a large selection of CSS classes to style our components easily.
+Install locally and save to package.json with :  
+npm install --save bootstrap@3
+npm install --save jquery
 
-  Useful class provided by bootstrap :
+Then update the "styles" and "scripts" arrays in angular.json :
+	"styles": [
+	  "node_modules/bootstrap/dist/css/bootstrap.min.css",
+	  "src/styles.css"
+	],
+	"scripts": [
+	  "node_modules/jquery/dist/jquery.js",
+	  "node_modules/bootstrap/dist/js/bootstrap.js"
+	]
+			
+Useful class provided by bootstrap :
 
   container          space above and below, fixed width (depending on screen size), 15px padding
   container-fluid    space above and below, 100% width, 15 px padding
@@ -1203,4 +1237,63 @@ USEFUL LIBRARIES
   <code>            fixed width font in pink
   <kbd>             for commands, white text on black bg with radius
 
+
+Loading.io
+----------
+
+A nice website offering some spinners (HTML and CSS).
+We can create an Angular spinner component by just copy/pasting the HTML and CSS code provided.
+
+
+Firebase
+--------
+
+In a real app, the backend can be in C++ / Java / Node / Python.
+To simulate the backend, we can use Firebase, a Google backend-as-a-service solution.
+It offers a lot of backend functionalities (authentication, database, storage, REST API).
+We will just use here the REST API to define HTTP endpoints for our Angular app.
+We will create a Firebase project, which is a container for several apps sharing backend (iOS / Android / web).
+A Firebase project is actually creating a Google Cloud Platform (GCP) project behind the scene.
+
+We will use Firebase Realtime database, it is a database that stores and gets objects directly via HTTP calls.
+When sending a POST, it is interpreted by Firebase to add an element in a folder of this database.
+
+- open the Firebase Console
+- Click "Create a Project" and give it a name ("myRecipes" in my example)
+- Once the project is created, we are on the overview dashboard of the project.
+- Go to Develop > Database > Create Real-time database (not Cloud Firestore)
+  Click "Set test mode" to allow anyone to do anything in the DB (later we will use authentication)
+
+Data tab:
+It creates a database and provides us with a base URL : https://mytest-4d456.firebaseio.com/
+We can execute HTTP requests on it, by adding a relative path at the end, for example :
+https://mytest-4d456.firebaseio.com/items.json
+NOTE : Firebase requires that we add the ".json" at the end to tell it the type.
+On a post, it will create a new element in the items folder with a unique ID (name).
+
+Rules tab:
+We can define the permission on read and write.
+Set the read permission to false to receive an error on any GET (to test error handling).
+
+Authentication
+
+Firebase also offers an authentication mechanism to create users and provide auth tokens.
+The simplest setup is to allow users to do anything they want if they are authenticated.
+We do not have ownership of resources here (we should add the owner in every resource if we had).
+We can set the Database rules to be :
+{
+  "rules": {
+    ".read": "auth != null",
+    ".write": "auth != null"
+  }
+}
+This will now send a 401 error to anyone hitting the endpoint without being authentified.
+
+In the "Authentication" tab, click on "Setup sign-in method", choose Email/Password and ensure "Enable" is selected.
+Once this is setup, we can see our users under the "Users" tab (originally empty of course).
+Infos on the auth endpoint by searching "Firebase Auth API" in Google.
+It is a dedicated API, completely unrelated with our real-time database.
+
+Signup : https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=[API_KEY]
+API_KEY is the web API key of our project, found in : Project Overview > Project Setup > Web API key
 

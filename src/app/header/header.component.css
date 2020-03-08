@@ -6,3 +6,7 @@
 .activeTab {
     background-color: #dddddd;
 }
+
+a {
+    cursor: pointer;
+}

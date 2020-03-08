@@ -1,0 +1,33 @@
+
+form {
+    border: 1px grey solid;
+    width: 500px;
+    padding: 20px;
+    margin: 50px auto;
+    background: #fafaff;
+}
+
+.btn-container {
+    margin: auto;
+    width: 180px;
+}
+
+button {
+    margin: 5px;
+}
+
+input.ng-touched.ng-invalid {
+    border: red solid 1px;
+    background-color: #fffafa;
+}
+
+.spinner-container {
+    display: block;
+    margin: 50px auto;
+}
+
+.alert {
+    margin-top: 20px;
+    margin: auto;
+    width: 90%;
+}

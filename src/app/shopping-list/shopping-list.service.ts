@@ -1,8 +1,10 @@
-import { Injectable, EventEmitter } from '@angular/core';
-import { Ingredient } from '../shared/ingredient.model';
-import { Subject } from 'rxjs';
+import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
+
+import { Ingredient } from '../shared/ingredient.model';
+
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +12,8 @@ import { map } from 'rxjs/operators';
 export class ShoppingListService {
 
   // must append ".json" to the endpoint for Firebase to know how to save it
-  private firebaseUrl = "https://myrecipes-4a862.firebaseio.com/ingredients.json";
+  // the auth token is added to the request by the AuthInterceptor
+  private firebaseUrl = "https://myrecipes-6270c.firebaseio.com/ingredients.json";
 
   private ingredients: Ingredient[] = [
     new Ingredient('Apples', 5),
