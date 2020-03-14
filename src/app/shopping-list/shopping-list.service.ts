@@ -13,7 +13,7 @@ export class ShoppingListService {
 
   // must append ".json" to the endpoint for Firebase to know how to save it
   // the auth token is added to the request by the AuthInterceptor
-  private firebaseUrl = "https://myrecipes-6270c.firebaseio.com/ingredients.json";
+  private firebaseUrl = 'https://myrecipes-6270c.firebaseio.com/ingredients.json';
 
   private ingredients: Ingredient[] = [
     new Ingredient('Apples', 5),
@@ -52,15 +52,15 @@ export class ShoppingListService {
   }
 
   addIngredient(ingredient: Ingredient) {
+    console.log('TIBO - ADD ingredient ' + ingredient.name);
     if (ingredient.name === '' || ingredient.amount === 0) {
       // invalid input, ignore it
       return;
     }
-    for (let i = 0; i < this.ingredients.length; i++) {
-      if (this.ingredients[i].name === ingredient.name) {
-        // found the ingredient in the list, replace its amount
-        const newAmount = ingredient.amount;
-        this.ingredients[i].amount = newAmount;
+    for (const ing of this.ingredients) {
+      if (ing.name === ingredient.name) {
+        // found the ingredient in the list, add its amount
+        ing.amount += ingredient.amount;
         this.ingredientsUpdated.next();
         return;
       }
@@ -80,13 +80,13 @@ export class ShoppingListService {
    *  - we delete all existing ingredients
    *  - we put all ingredients from the "ingredients" array
    * That is of course not an acceptable solution in prod but ok for this tuto
-   * (since we would lose all ingredients if crash between the delete and the put) 
+   * (since we would lose all ingredients if crash between the delete and the put)
    */
   persistIngredients() {
     console.log('Get ingredients from Firebase.');
 
     // delete all existing ingredients in Firebase
-    var deleteReq = this.http.delete(this.firebaseUrl);
+    const deleteReq = this.http.delete(this.firebaseUrl);
     deleteReq.subscribe(
       /* Success callback */
       (data: null) => {
@@ -97,7 +97,7 @@ export class ShoppingListService {
         this.persistIngredientsInFirebase();
       },
       /* Error callback */
-      (error: HttpErrorResponse) => { 
+      (error: HttpErrorResponse) => {
         console.log('Failed to delete all ingredients from Firebase :');
         console.log(error);
       }
@@ -108,7 +108,7 @@ export class ShoppingListService {
     // Save 1 by 1 all ingredients in Firebase
     // The "ingredients" folder is created in Firebase if missing
     for (const ing of this.ingredients) {
-      var postReq = this.http.post(this.firebaseUrl, ing);
+      const postReq = this.http.post(this.firebaseUrl, ing);
       postReq.subscribe( (data: {name: string}) => {
         console.log('Posted ingredient ' + ing.name + ' :');
         console.log(data);
@@ -122,9 +122,9 @@ export class ShoppingListService {
   loadIngredients() {
     this.http.get(this.firebaseUrl)
         /* Convert the data to get a nice array of ingredients */
-        .pipe(map((data: {[key: string] : Ingredient}) => {
-          var ingredients: Ingredient[] = [];
-          for (var key in data) {
+        .pipe(map((data: {[key: string]: Ingredient}) => {
+          const ingredients: Ingredient[] = [];
+          for (const key in data) {
             if (data.hasOwnProperty(key)) {
               /* Create new to have a real Ingredient with clone() method */
               ingredients.push(new Ingredient(
@@ -138,7 +138,7 @@ export class ShoppingListService {
         .subscribe(ingredients => {
           console.log(ingredients);
           this.ingredients = ingredients.sort(
-            (ing1, ing2) : number => { return ing1.amount - ing2.amount; }
+            (ing1, ing2): number => ing1.amount - ing2.amount
           );
           this.ingredientsUpdated.next();
         });

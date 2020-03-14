@@ -24,26 +24,6 @@ export class ShoppingListComponent implements OnInit, OnDestroy {
         );
   }
 
-  // onEdit(ingredient: Ingredient) {
-  //   for (let i = 0; i < this.ingredients.length; i++) {
-  //     if (this.ingredients[i].name === ingredient.name) {
-  //       const newAmount = Math.max(0, this.ingredients[i].amount + ingredient.amount);
-  //       if (newAmount > 0) {
-  //         this.ingredients[i].amount = newAmount;
-  //       } else {
-  //         this.ingredients.splice(i, 1);
-  //       }
-  //       return;
-  //     }
-  //   }
-  //   // if we reach here, the ingredient was not in the list
-  //   if (ingredient.amount > 0) {
-  //     this.ingredients.push(
-  //       new Ingredient(ingredient.name, ingredient.amount)
-  //     );
-  //   }
-  // }
-
   ngOnDestroy(): void {
     // remove the subscription when the component is destroyed
     this.ingredientsSubscription.unsubscribe();
