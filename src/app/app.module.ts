@@ -8,7 +8,7 @@ import { HeaderComponent } from './header/header.component';
 import { NotFoundComponent } from './shared/not-found/not-found.component';
 import { AuthInterceptor } from './auth/auth-interceptor.service';
 import { AlertComponent } from './shared/alert/alert.component';
-import { RecipesModule } from './recipes/recipes.module';
+// import { RecipesModule } from './recipes/recipes.module';   // removed if lazy loading
 import { ShoppingListModule } from './shopping-list/shopping-list.module';
 import { SharedModule } from './shared/shared.module';
 import { AuthModule } from './auth/auth.module';
@@ -38,7 +38,7 @@ import { AuthModule } from './auth/auth.module';
     // if we have feature modules with child routes, add them first
     // so they are included before the "not found" route !
     SharedModule,
-    RecipesModule,
+//    RecipesModule,
     ShoppingListModule,
     AuthModule,
     AppRoutingModule

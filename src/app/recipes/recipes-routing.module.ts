@@ -14,7 +14,10 @@ import { RecipeDetailComponent } from './recipe-detail/recipe-detail.component';
 console.log('LOADING');
 
 const routes: Routes = [
-  { path: 'recipes', component: RecipesComponent, canActivate: [AuthGuard],
+  // without lazy loading, declare the "recipes" route :
+  //  { path: 'recipes', component: RecipesComponent, canActivate: [AuthGuard],
+  // with lazy loading, the "recipes" route is declared in app-routing.module.ts :
+  { path: '', component: RecipesComponent, canActivate: [AuthGuard],
   children: [
       { path: '', component: SelectARecipeComponent, pathMatch: 'full' },
       { path: 'new', component: RecipeEditComponent },

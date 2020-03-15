@@ -66,7 +66,8 @@ WHAT IS ANGULAR ?
 
 An Angular App is composed of several elements :
  - components  : representing one element of the app (TS + HTML + CSS)
- - modules     : grouping components by functionality (only 1 for small apps)
+ - modules     : grouping building blocks (components, services, directives ...) by functionality
+                 Small apps may have only one module.
  - services    : utility class used across the app by multiple components or services (TS)
  - models      : representation of a concept used across the app (TS)
  - guards      : code executed before loading a route to validate or resolve data (TS)
@@ -90,10 +91,60 @@ A component is made of :
 Most Angular apps use TypeScript, subset of JS compiling in JS offering classes and
 strong typing.
 
+Modules
+-------
+
 Every angular app has at least 1 module, by default called app-module.
 We can create other Angular modules to group components related to a given feature.
-Every module contains a bunch of components.
-A component is part of one and only one module.
+This makes the code much more readable, maintainable and allows performance improvements (lazy loading).
+Every module contains a bunch of components / directives / pipes ...
+A component / directive / pipe is part of one and only one module.
+Services are usually included app-wide with the "providedIn" prop set to "root", so they
+do not appear in the module definition.
+A frequent module is app-routing.module.ts in charge of the routing.
+
+Some modules are provided built-in in Angular, for example the FormsModule containing the ngModel directive.
+All modules we use in our app (custom and builtin) must be listed in the "imports" of AppModule (or of
+the feature module usniig them).
+When we import a module, we basically import everything this module exports.
+Everything else the module declares but does not export is not accessible.
+That is why the AppRoutingModule updates the RouterModule, and then exports it, so AppModule imports it and has routing.
+
+To create a feature module, we just need a TS class with NgModule() decorator and the folowing props :
+- "declarations" : all components that belong to this module (each component iis declared in a single module)
+- "imports" :      modules containing some components used in the module (AppRoutingModule, FormsModule,...)
+                   must always contain CommonModule (or a module exporting it, like a custom SharedModule).
+- "exports" :      all components that we want to make available to other modules importing this module
+                   the components only used inside this module do not need to be exported
+We can also move the routes related to this module into a dedicated xxx-routing.module.ts module.
+This must use the forChild() method of the router module, and export the RouterModule :
+    RouterModule.forChild(routes)
+
+We can create one (or several) shared module.
+It is very similar to feature modules, but it exports all its components so other modules that import it
+can include these components in their templates.
+
+We see sometimes a Core module in some Angular projects.
+It is meant to include all the services that will be available across the app.
+An alternative to this in recent Angular is to use prop "providedIn" set to 'root' in the services.
+Then services are included app-wide and do not need to be included in any module definition.
+
+We can use "lazy loading" to associate some roots with a module, and load the components in the module only
+when one of its routes were called.
+To set up lazy loading :
+  - add in the app-routing.module.ts file a route without a "component", but with a "loadChildren" property with 
+    the relative path to the module to load lazily, followed by a hashtag and the module class name :
+        path: '/recipes', loadChildren: './recipes/recipes.module.ts#RecipesModule'
+  - in the routing of the lazily loaded module, the "root" route should now be '' (since the root route is now
+    included in app-routing and loads the child module)
+  - remove the lazily loaded module from the TS and Angular imports in AppModule
+We can now see in the Network inspector of the browser debugger that the main.js is smaller, but when we actually
+navigate to a route in the lazily loaded module, the browser loads another js bundle for this module.
+
+By default lazily loaded modules are loaded when called.
+To improve the perf, we can set the loading strategy to preload all modules in app-routing.module.ts :
+  imports: [ RouterModule.forRoot(routes, {preloadingStrategy: PreloadAllModules}) ],
+
 
 Angular comes with an integrated web server (started with "ng serve -o").
 It uses webpack that bundles all our code into JS bundles every time we save.
@@ -115,6 +166,22 @@ The data that we use across the app can be represented by models.
 The files should be named XXX.model.ts, and will represent the structure of the data.
 For ex in our app managing recipes, we will have a recipe.model.ts to represent what info a recipe contains.
 
+
+DEPLOY ANGULAR APP
+------------------
+
+When running "ng serve -o", we are running a web server and shipping the Angular compiler in the app.
+Everytime we query some component, the compiler will be called in the browser to convert Angular templates into JS code.
+This is great for debugging, but in prod we want to pre-compile to JS and not ship the Angular compiler.
+
+The Angular app needs to be built with command :
+  $>  ng build --prod
+This will generate under the dist/ folder a few files that we can deploy to run our app.
+These files are a shrinked version of our app code.
+
+Note : The "Ahead of Time" compiler used when building is stricter than the "Just In Time" compiler used in debug.
+       This means some compiling issues can occur :
+         - If some TS code is not understood in the template, we can move it to a function in the TS
 
 
 DATA BINDING

@@ -1,15 +1,22 @@
 import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
+import { Routes, RouterModule, PreloadAllModules } from '@angular/router';
 
 import { NotFoundComponent } from './shared/not-found/not-found.component';
 
 const routes: Routes = [
-    { path: '', redirectTo: '/recipes', pathMatch: 'full' },
+    // welcome page
+    { path: '', redirectTo: 'recipes', pathMatch: 'full' },
+
+    // lazy loading (we lazy load only the RecipesModule)
+    { path: 'recipes', loadChildren: './recipes/recipes.module#RecipesModule' },
+
+    // default route if invalid URL
     { path: '**', component: NotFoundComponent },
   ];
 
 @NgModule({
-  imports: [ RouterModule.forRoot(routes) ],
+  // Preload all lazily loaded modules
+  imports: [ RouterModule.forRoot(routes, {preloadingStrategy: PreloadAllModules}) ],
   exports: [ RouterModule ]
 })
 export class AppRoutingModule {}
