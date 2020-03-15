@@ -116,4 +116,8 @@ export class RecipeEditComponent implements OnInit {
     // goes back either to home (if creating new) or to the edited recipe
     this.router.navigate(['..'], {relativeTo: this.route});
   }
+
+  getAllControls() {
+    return (this.myRecipeForm.get('ingredients') as FormArray).controls;
+  }
 }

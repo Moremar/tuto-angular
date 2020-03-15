@@ -36,7 +36,7 @@ export class DropdownDirective {
     // listener on a click anywhere in the document
     // if the click is on the button, toggle the menu, else close the menu
     // to access the $event of the event, we add ['$event'] parameter to @HostListener
-    @HostListener('document:click', ['$event']) toggleMenu() {
+    @HostListener('document:click', ['$event']) toggleMenu(event) {
         const target: HTMLElement = this.elementRef.nativeElement;
         this.shouldShow = (target === event.target) ? !this.shouldShow : false;
         if (this.shouldShow) {
