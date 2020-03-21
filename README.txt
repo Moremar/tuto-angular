@@ -170,18 +170,57 @@ For ex in our app managing recipes, we will have a recipe.model.ts to represent 
 DEPLOY ANGULAR APP
 ------------------
 
-When running "ng serve -o", we are running a web server and shipping the Angular compiler in the app.
-Everytime we query some component, the compiler will be called in the browser to convert Angular templates into JS code.
-This is great for debugging, but in prod we want to pre-compile to JS and not ship the Angular compiler.
-
-The Angular app needs to be built with command :
-  $>  ng build --prod
+The Angular project is build for production with :  ng build --prod
 This will generate under the dist/ folder a few files that we can deploy to run our app.
 These files are a shrinked version of our app code.
 
-Note : The "Ahead of Time" compiler used when building is stricter than the "Just In Time" compiler used in debug.
-       This means some compiling issues can occur :
-         - If some TS code is not understood in the template, we can move it to a function in the TS
+After the artifacts (generated files) are built, we get only HTML / CSS / JS code.
+This can thus be deployed to a static website host that deliver only HTML/CSS/JS.
+Popular options are :
+  - AWS S3 (need AWS account)
+  - Firebase Hosting (completely independant from the Firebae DB we use in the project)
+If we have a custom backend, we obviously need to ensure they can communicate (REST API...).
+
+Deploy with Firebase Hosting
+----------------------------
+Firebase hosting offers hosting service for static (HTML/JS/CSS) and dynamic (Express) websites.
+We can link it to use a custom domain name.
+website : https://firebase.google.com/docs/hosting
+ - install Firebase CLI to get the "firebase" command : 
+   $>  npm install -g firebase-tools
+ - login to our Google account :
+   $>  firebase login
+ - initialize our project in Firebase :
+   $>  cd <project_path>
+   $>  firebase init 
+       -> select "Hosting" with Space, then Enter
+       -> select the Firebase project created earlier (or create a new one if didnt use Firebase earlier)
+       -> for the folder, do not use "public", replace by the folder of our code (dist/recipe-app for me)
+       -> Single-page app : "y" 
+       -> overwrite index.html: "N"
+ - deploy the built files to Firebase :
+   $>  firebase deploy
+   This outputs an URL where our app is available on Firebase servers.
+   The deployed files can now be seen in the Hosting tab of the Firebase console of this project.
+
+
+Note 1 : "Ahead of Time" compilation
+         ---------------------------
+When running "ng serve -o", we are running a web server and shipping the Angular compiler in the app.
+Everytime we query some component, the compiler will be called in the browser to convert Angular templates into JS code.
+This is called "Just In Time" compilation, which is great for debugging.
+In prod we want to pre-compile to JS and not ship the Angular compiler, this is "Ahead of Time" compilation.
+It is stricter than the "Just In Time" compiler used in debug, so new compilation errors can occur :
+ - If some TS code is not understood in the template, we can move it to a function in the TS
+
+Note 2 : Environment variables
+         ---------------------
+Angular offers in ./src/environments/ a prod and QA file for environment variables.
+The "env" object can store some key/value pairs.
+Angular will automatically pick the prod or QA file depending on how we build.
+This way we can use different values for prod and QA (for ex to store an API key).
+To use it in the code, just import "environment" from src/environments/environment.
+
 
 
 DATA BINDING
@@ -1310,6 +1349,17 @@ last emitted value even if we subscribe after it was emitted.
 
 USEFUL TOOLS
 ------------
+
+Visual studio Code
+------------------
+
+Free IDE with good Angular support.
+Use extension "Angular Essentials" from John Papa (bundle of useful extensions).
+
+Augury
+------
+
+Chrome browser extension to debug Angular app.
 
 Bootstrap
 ---------

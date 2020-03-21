@@ -6,6 +6,10 @@ import { catchError, tap } from 'rxjs/operators';
 import { User } from './user.model';
 import { Router } from '@angular/router';
 
+// To access environment variables
+// The prod or QA is automatically selected by Angular
+import { environment } from '../../environments/environment';
+
 /*
  * This service handles all authentication operations (signup / login / logout)
  * It should use HTTP to communicate with the backend.
@@ -26,7 +30,7 @@ interface AuthResponse {
   refreshToken: string;
   expiresIn: string;
   localId: string;
-  registered?: boolean
+  registered?: boolean;
 }
 
 
@@ -36,7 +40,7 @@ interface AuthResponse {
 export class AuthService {
 
   // Key identifying a project in Firebase, needs to be included in every Auth API call
-  FIREBASE_AUTH_API_KEY = "AIzaSyCW44Dq5Jm4cUkpAb-ONTCqgZAOnmWC-iY";
+  FIREBASE_AUTH_API_KEY = environment.firebaseApiKey;
 
   // store the authenticated user as a Subject (to react when it changes)
   // that is great when we want the UI to react to the user change, for ex to change the links in the header
