@@ -16,10 +16,10 @@ import { User } from '../auth/user.model';
 export class HeaderComponent implements OnInit, OnDestroy {
 
   authenticated = false;
-  userSub : Subscription;
+  userSub: Subscription;
 
   constructor(
-    private recipeService: RecipesService, 
+    private recipeService: RecipesService,
     private shoppingListService: ShoppingListService,
     private authService: AuthService) {}
 

@@ -17,10 +17,10 @@ import { environment } from '../../environments/environment';
  *  - create users (signup)
  *  - get a token (login)
  *  - deactivate the token (logout)
- * 
+ *
  * In this example, we use Firebase for the backend, so we use the Firebase Auth API :
  * https://firebase.google.com/docs/reference/rest/auth
- */ 
+ */
 
 // type of data returned by the signup endpoint of the Firebase Auth API
 interface AuthResponse {
@@ -55,8 +55,7 @@ export class AuthService {
 
   constructor(
         private http: HttpClient,
-        private router: Router)
-  {}
+        private router: Router) {}
 
 
   getToken() {
@@ -68,7 +67,7 @@ export class AuthService {
   }
 
   // common code for signup and login, only the URL differs
-  private createAuthObservable(authUrl : string, email: string, password: string) : Observable<AuthResponse> {
+  private createAuthObservable(authUrl: string, email: string, password: string): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(authUrl, {
       email: email,
       password: password,
@@ -76,8 +75,8 @@ export class AuthService {
     })
     // if an error is thrown, send only an error message for the GUI to display it
     .pipe(catchError(
-      (errorResponse : HttpErrorResponse) => {
-        let errorMess = "Unknown authentication error.";
+      (errorResponse: HttpErrorResponse) => {
+        let errorMess = 'Unknown authentication error.';
         if (errorResponse.error && errorResponse.error.error) {
           switch (errorResponse.error.error.message) {
             case 'EMAIL_EXISTS':  {
@@ -119,10 +118,10 @@ export class AuthService {
   }
 
 
-  /* 
+  /*
    * Create a new user by sending the email/password to the auth HTTP API
    * https://firebase.google.com/docs/reference/rest/auth#section-create-email-password
-   * 
+   *
    * The caller needs to subscribe to the returned observable for the HTTP request to be sent.
    */
   signup(email: string, password: string): Observable<AuthResponse> {

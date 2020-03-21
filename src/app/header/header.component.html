@@ -10,7 +10,7 @@
     <!-- Navbar links -->
     <div class="collapse navbar-collapse" id="collapsibleNavbar">
         <ul class="navbar-nav">
-            <li routerLinkActive="activeTab" class="nav-item"  *ngIf="!authenticated">
+            <li routerLinkActive="activeTab" class="nav-item" *ngIf="!authenticated">
                 <a class="nav-link" [routerLink]="['login']">Login</a>
             </li>
             <li routerLinkActive="activeTab" class="nav-item" *ngIf="authenticated">

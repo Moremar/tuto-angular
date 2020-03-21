@@ -1,8 +1,9 @@
 import { Component, OnInit, ViewChild, OnDestroy } from '@angular/core';
-import { Ingredient } from 'src/app/shared/ingredient.model';
-import { ShoppingListService } from '../shopping-list.service';
 import { NgForm } from '@angular/forms';
 import { Subscription } from 'rxjs';
+
+import { ShoppingListService } from '../shopping-list.service';
+import { Ingredient } from 'src/app/shared/ingredient.model';
 
 @Component({
   selector: 'app-shopping-edit',
@@ -37,7 +38,7 @@ export class ShoppingEditComponent implements OnInit, OnDestroy {
     console.log(this.myShoppingForm);
     const name = this.myShoppingForm.value.ingredientName;
     const amount = this.myShoppingForm.value.ingredientAmount;
-    const newIng = new Ingredient(name, amount)
+    const newIng = new Ingredient(name, amount);
     this.shoppingListService.addIngredient(newIng);
     this.myShoppingForm.reset();
   }

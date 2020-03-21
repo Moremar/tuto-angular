@@ -1,4 +1,4 @@
-import { Component } from "@angular/core";
+import { Component } from '@angular/core';
 
 /*
  * The spinner HTML (template) and CSS (style) are copied from :

@@ -13,7 +13,7 @@ export class RecipesService {
 
   // must append ".json" to the endpoint for Firebase to know how to save it
   // the auth token is added to the request by the AuthInterceptor
-  private firebaseUrl = "https://myrecipes-6270c.firebaseio.com/recipes.json";
+  private firebaseUrl = 'https://myrecipes-6270c.firebaseio.com/recipes.json';
 
   private recipes: Recipe[] = [
     new Recipe(0,
@@ -46,8 +46,8 @@ export class RecipesService {
   }
 
   getRecipe(id: number) {
-    for(const recipe of this.recipes) {
-      if (recipe.id == id) {
+    for (const recipe of this.recipes) {
+      if (recipe.id === id) {
         return recipe.clone();
       }
     }
@@ -57,17 +57,17 @@ export class RecipesService {
   }
 
   getNextId() {
-    var maxId = -1;
-    for (var recipe of this.recipes) {
+    let maxId = -1;
+    for (const recipe of this.recipes) {
       if (recipe.id > maxId) {
-        maxId = recipe.id
+        maxId = recipe.id;
       }
     }
     return maxId + 1;
   }
 
   createRecipe(recipe: Recipe): number {
-    if (recipe.id == -1) {
+    if (recipe.id === -1) {
       recipe.id = this.getNextId();
       this.recipes.push(recipe);
       this.recipesChanged.next();
@@ -78,8 +78,8 @@ export class RecipesService {
   }
 
   updateRecipe(recipe: Recipe) {
-    for(let i = 0; i < this.recipes.length; i++) {
-      if (this.recipes[i].id == recipe.id) {
+    for (let i = 0; i < this.recipes.length; i++) {
+      if (this.recipes[i].id === recipe.id) {
         this.recipes[i] = recipe;
         this.recipesChanged.next();
         return;
@@ -89,8 +89,8 @@ export class RecipesService {
   }
 
   deleteRecipe(recipeId: number) {
-    for(let i = 0; i < this.recipes.length; i++) {
-      if (this.recipes[i].id == recipeId) {
+    for (let i = 0; i < this.recipes.length; i++) {
+      if (this.recipes[i].id === recipeId) {
         this.recipes.splice(i, 1);
         this.recipesChanged.next();
         return;
@@ -104,13 +104,13 @@ export class RecipesService {
    *  - we delete all existing recipes
    *  - we put all recipes from the "recipes" array
    * That is of course not an acceptable solution in prod but ok for this tuto
-   * (since we would lose all recipes if crash between the delete and the put) 
+   * (since we would lose all recipes if crash between the delete and the put)
    */
   persistRecipes() {
     console.log('Get recipes from Firebase.');
 
     // delete all existing recipes in Firebase
-    var deleteReq = this.http.delete(this.firebaseUrl);
+    const deleteReq = this.http.delete(this.firebaseUrl);
     deleteReq.subscribe(
       /* Success callback */
       (data: null) => {
@@ -121,7 +121,7 @@ export class RecipesService {
         this.persistRecipesInFirebase();
       },
       /* Error callback */
-      (error: HttpErrorResponse) => { 
+      (error: HttpErrorResponse) => {
         console.log('Failed to delete all recipes from Firebase :');
         console.log(error);
       }
@@ -132,7 +132,7 @@ export class RecipesService {
     // Save 1 by 1 all recipes in Firebase
     // The "recipes" folder is created in Firebase if missing
     for (const recipe of this.recipes) {
-      var postReq = this.http.post(this.firebaseUrl, recipe);
+      const postReq = this.http.post(this.firebaseUrl, recipe);
       postReq.subscribe( (data: {name: string}) => {
         console.log('Posted recipe ' + recipe.id + ' :');
         console.log(data);
@@ -146,18 +146,18 @@ export class RecipesService {
   loadRecipes() {
     this.http.get(this.firebaseUrl)
         /* Convert the data to get a nice array of recipes */
-        .pipe(map((data: {[key: string] : Recipe}) => {
-          var recipes: Recipe[] = [];
-          for (var key in data) {
+        .pipe(map((data: {[key: string]: Recipe}) => {
+          const recipes: Recipe[] = [];
+          for (const key in data) {
             if (data.hasOwnProperty(key)) {
               /* Create new to have a real Recipe with clone() method */
-              const ingredients : Ingredient[] = [];
+              const ingredients: Ingredient[] = [];
               if (data[key].hasOwnProperty('ingredients')) {
-                for (var ing of data[key].ingredients) {
+                for (const ing of data[key].ingredients) {
                   /* Make a real Ingredient so it has the clone() method */
                   ingredients.push(new Ingredient(ing.name, ing.amount));
                 }
-              } 
+              }
               recipes.push(new Recipe(
                 data[key].id,
                 data[key].name,
@@ -172,7 +172,7 @@ export class RecipesService {
         .subscribe(recipes => {
           console.log(recipes);
           this.recipes = recipes.sort(
-            (r1, r2) : number => { return r1.id - r2.id; }
+            (r1, r2): number => r1.id - r2.id
           );
           this.recipesChanged.next();
         });

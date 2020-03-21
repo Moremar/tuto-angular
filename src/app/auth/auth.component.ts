@@ -12,7 +12,7 @@ import { AlertComponent } from '../shared/alert/alert.component';
  * If an error occurs while trying to login, we have 2 possibilities to display it :
  *  - in a div in this component
  *  - in a modal from a different component
-  */
+ */
 
 @Component({
   selector: 'app-auth',
@@ -22,7 +22,7 @@ import { AlertComponent } from '../shared/alert/alert.component';
 export class AuthComponent implements OnInit, OnDestroy {
 
   // JS object representing the form provided by Angular
-  @ViewChild('authForm', {static: false}) authForm : NgForm;
+  @ViewChild('authForm', {static: false}) authForm: NgForm;
 
   // template where we can display our modal when an error occurs
   @ViewChild(PlaceholderDirective, {static: false}) errorModalTemplate: PlaceholderDirective;
@@ -40,8 +40,7 @@ export class AuthComponent implements OnInit, OnDestroy {
   constructor(
         private authService: AuthService,
         private router: Router,
-        private factoryResolver: ComponentFactoryResolver)
-  {}
+        private factoryResolver: ComponentFactoryResolver) {}
 
   ngOnInit() {}
 
@@ -55,7 +54,7 @@ export class AuthComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     this.errorMessage = null;
     const authObservable = this.authService.signup(
-      this.authForm.value.email, 
+      this.authForm.value.email,
       this.authForm.value.password);
     this.subscribeAuthObservable(authObservable);
     this.authForm.reset();
@@ -65,12 +64,12 @@ export class AuthComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     this.errorMessage = null;
     const authObservable = this.authService.login(
-      this.authForm.value.email, 
+      this.authForm.value.email,
       this.authForm.value.password);
     this.subscribeAuthObservable(authObservable);
     this.authForm.reset();
   }
-  
+
   // common auth handler for login of signup
   private subscribeAuthObservable(authObservable) {
     authObservable.subscribe(
@@ -80,14 +79,14 @@ export class AuthComponent implements OnInit, OnDestroy {
         this.isLoading = false;
         this.router.navigate(['/recipes'] );
       },
-      // here we receive an error message created by the catchError pipe operator 
+      // here we receive an error message created by the catchError pipe operator
       // in the auth service
       errorMess => {
         console.log('Received auth error : ');
         console.log(errorMess);
 
         // if we want to use the error <div> inside the HTML
-        //this.errorMessage = errorMess;
+        // this.errorMessage = errorMess;
 
         // alternatively if we want to dynamically create an error modal
         this.showAlertModal(errorMess);
@@ -112,7 +111,7 @@ export class AuthComponent implements OnInit, OnDestroy {
 
     // link input and output
     modalRef.instance.message = message;
-    this.modalCloseSub = modalRef.instance.close.subscribe(
+    this.modalCloseSub = modalRef.instance.closeAlert.subscribe(
       () => {
         this.modalCloseSub.unsubscribe();
         viewContainerRef.clear();

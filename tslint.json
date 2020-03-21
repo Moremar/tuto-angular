@@ -83,7 +83,16 @@
     "template-banana-in-box": true,
     "template-no-negated-async": true,
     "use-lifecycle-interface": true,
-    "use-pipe-transform-interface": true
+    "use-pipe-transform-interface": true,
+    "object-literal-shorthand": [true, "never"],
+    "variable-name": {
+      "options": [
+        "allow-leading-underscore",
+        "ban-keywords",
+        "check-format",
+        "require-const-for-all-caps"
+      ]
+    }
   },
   "rulesDirectory": [
     "codelyzer"

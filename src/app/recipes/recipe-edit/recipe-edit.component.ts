@@ -20,8 +20,8 @@ export class RecipeEditComponent implements OnInit {
   buttonLabel = 'Create';
 
   constructor(
-    private route: ActivatedRoute, 
-    private router: Router, 
+    private route: ActivatedRoute,
+    private router: Router,
     private recipesService: RecipesService) {}
 
   ngOnInit() {
@@ -45,26 +45,24 @@ export class RecipeEditComponent implements OnInit {
   // Create the reactive form
   // We need a reactive form because we have a dynamic array of ingredients
   private loadForm() {
-    let recipeName = this.recipe.name;
-    let imagePath = this.recipe.imagePath;
-    let description = this.recipe.description;
-    let ingredients = new FormArray([]);
-    for (let ing of this.recipe.ingredients) {
+    const recipeName = this.recipe.name;
+    const imagePath = this.recipe.imagePath;
+    const description = this.recipe.description;
+    const ingredients = new FormArray([]);
+    for (const ing of this.recipe.ingredients) {
       // each ingredient is a form group of 2 controls (name and amount)
       ingredients.push(new FormGroup({
         name: new FormControl(ing.name, Validators.required),
         amount: new FormControl(ing.amount, [Validators.required, Validators.pattern(/^[1-9]+[0-9]*$/)])
       }));
     }
-    
+
     this.myRecipeForm = new FormGroup({
       recipeName: new FormControl(recipeName, Validators.required),
       imagePath: new FormControl(imagePath, Validators.required),
       description: new FormControl(description, Validators.required),
       ingredients: ingredients
     });
-
-
   }
 
   onSubmit() {
@@ -80,7 +78,7 @@ export class RecipeEditComponent implements OnInit {
       this.router.navigate(['recipes', this.recipeId]);
     } else {
       console.log('Create new !');
-      let newRecipeId = this.recipesService.createRecipe(this.recipe);
+      const newRecipeId = this.recipesService.createRecipe(this.recipe);
       this.router.navigate(['recipes', newRecipeId]);
     }
   }
@@ -94,8 +92,7 @@ export class RecipeEditComponent implements OnInit {
     this.recipe.imagePath = this.myRecipeForm.value.imagePath;
     this.recipe.description = this.myRecipeForm.value.description;
     this.recipe.ingredients = [];
-    for (let i = 0; i < this.myRecipeForm.value.ingredients.length; i++) {
-      let ing = this.myRecipeForm.value.ingredients[i];
+    for (const ing of this.myRecipeForm.value.ingredients) {
       this.recipe.ingredients.push(new Ingredient(ing.name, ing.amount));
     }
   }

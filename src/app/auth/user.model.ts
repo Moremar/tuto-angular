@@ -7,7 +7,7 @@ export class User {
         private userId: string,
         private _token: string,
         private _tokenExpirationDate: Date,
-    ) {};
+    ) {}
 
     /*
      * TS getter (accessed by user.token)

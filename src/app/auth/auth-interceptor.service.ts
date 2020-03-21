@@ -6,8 +6,8 @@ import { AuthService } from './auth.service';
 
 /**
  * Interceptor to add the auth token to every HTTP request
- * 
- * Interceptors do not take the providedIn prop in the @Injectable decorator 
+ *
+ * Interceptors do not take the providedIn prop in the @Injectable decorator
  * instead they need to be added to the providers in the module
  * they uses the key "HTTP_INTERCEPTORS" in the providers
  */

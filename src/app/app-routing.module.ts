@@ -3,6 +3,7 @@ import { Routes, RouterModule, PreloadAllModules } from '@angular/router';
 
 import { NotFoundComponent } from './shared/not-found/not-found.component';
 
+
 const routes: Routes = [
     // welcome page
     { path: '', redirectTo: 'recipes', pathMatch: 'full' },

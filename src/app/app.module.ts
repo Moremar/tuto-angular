@@ -13,6 +13,7 @@ import { ShoppingListModule } from './shopping-list/shopping-list.module';
 import { SharedModule } from './shared/shared.module';
 import { AuthModule } from './auth/auth.module';
 
+
 /* If no custom routing module, add the routes here  */
 // const routes: Routes = [
 //   { path: '', component: RecipesComponent, pathMatch: 'full' },

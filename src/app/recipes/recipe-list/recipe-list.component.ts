@@ -1,8 +1,9 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Recipe } from '../recipe.model';
-import { RecipesService } from '../recipes.service';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
+
+import { RecipesService } from '../recipes.service';
+import { Recipe } from '../recipe.model';
 
 @Component({
   selector: 'app-recipe-list',
@@ -11,7 +12,7 @@ import { Subscription } from 'rxjs';
 })
 export class RecipeListComponent implements OnInit, OnDestroy {
 
-  subscription : Subscription;
+  subscription: Subscription;
   recipes: Recipe[];
 
   constructor(private recipesService: RecipesService, private router: Router) { }
