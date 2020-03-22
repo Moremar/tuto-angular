@@ -134,8 +134,8 @@ We can use "lazy loading" to associate some roots with a module, and load the co
 when one of its routes were called.
 To set up lazy loading :
   - add in the app-routing.module.ts file a route without a "component", but with a "loadChildren" property with
-    the relative path to the module to load lazily, followed by a hashtag and the module class name :
-        path: '/recipes', loadChildren: './recipes/recipes.module.ts#RecipesModule'
+    a lambda returning the name of the module to load lazily :
+        path: 'recipes', loadChildren: () => import('./recipes/recipes.module').then(m => m.RecipesModule),
   - in the routing of the lazily loaded module, the "root" route should now be '' (since the root route is now
     included in app-routing and loads the child module)
   - remove the lazily loaded module from the TS and Angular imports in AppModule
