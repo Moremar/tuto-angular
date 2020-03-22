@@ -9,7 +9,7 @@ const routes: Routes = [
     { path: '', redirectTo: 'recipes', pathMatch: 'full' },
 
     // lazy loading (we lazy load only the RecipesModule)
-    { path: 'recipes', loadChildren: './recipes/recipes.module#RecipesModule' },
+    { path: 'recipes', loadChildren: () => import('./recipes/recipes.module').then(m => m.RecipesModule) },
 
     // default route if invalid URL
     { path: '**', component: NotFoundComponent },

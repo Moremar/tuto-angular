@@ -22,10 +22,10 @@ import { AlertComponent } from '../shared/alert/alert.component';
 export class AuthComponent implements OnInit, OnDestroy {
 
   // JS object representing the form provided by Angular
-  @ViewChild('authForm', {static: false}) authForm: NgForm;
+  @ViewChild('authForm') authForm: NgForm;
 
   // template where we can display our modal when an error occurs
-  @ViewChild(PlaceholderDirective, {static: false}) errorModalTemplate: PlaceholderDirective;
+  @ViewChild(PlaceholderDirective) errorModalTemplate: PlaceholderDirective;
 
   // to know if we should display a spinner
   isLoading = false;

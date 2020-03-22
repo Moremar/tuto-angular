@@ -12,7 +12,7 @@ import { Ingredient } from 'src/app/shared/ingredient.model';
 })
 export class ShoppingEditComponent implements OnInit, OnDestroy {
 
-  @ViewChild('myShoppingForm', {static: false}) myShoppingForm: NgForm;
+  @ViewChild('myShoppingForm') myShoppingForm: NgForm;
 
   constructor(private shoppingListService: ShoppingListService) { }
 

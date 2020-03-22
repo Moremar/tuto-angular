@@ -8,7 +8,7 @@ SETUP
 Download required tools :
 - Install Node.js (including NPM)
 - Install Angular/CLI :     npm install @angular/cli -g
-- Install typescript  :     npm install typescript -g 
+- Install typescript  :     npm install typescript -g
   This install globally the tsc command (transcript compiler) to transpile TS into JS.
   Transpile TS to JS :      tsc myfile.ts
   Execute JS code :         node myfile.js
@@ -50,6 +50,7 @@ ng e2e                      Run end-to-end tests
 ng build                    Build app for deployment
                             Bundles are created under /dist
 ng build --prod             Build for prod
+ng update                   Update the project to latest angular version
 
 
 WHAT IS ANGULAR ?
@@ -132,7 +133,7 @@ Then services are included app-wide and do not need to be included in any module
 We can use "lazy loading" to associate some roots with a module, and load the components in the module only
 when one of its routes were called.
 To set up lazy loading :
-  - add in the app-routing.module.ts file a route without a "component", but with a "loadChildren" property with 
+  - add in the app-routing.module.ts file a route without a "component", but with a "loadChildren" property with
     the relative path to the module to load lazily, followed by a hashtag and the module class name :
         path: '/recipes', loadChildren: './recipes/recipes.module.ts#RecipesModule'
   - in the routing of the lazily loaded module, the "root" route should now be '' (since the root route is now
@@ -154,7 +155,7 @@ and the page is updated everytime we change and save the code.
 An Angular app is a single page application. It serves the HTML file "index.html".
 This file will contain our "app-root" component, that will contain all our app.
 
-When we run "ng serve", the Angular CLI groups our custom code (all our components) into JS bundles 
+When we run "ng serve", the Angular CLI groups our custom code (all our components) into JS bundles
 and add it at the end of the served index.tml.
 The first code to be executed is main.ts, that bootstraps the AppModule.
 The AppModule contains a "bootstrap" property equal to [ AppComponent ], so Angular knows that the app
@@ -186,17 +187,17 @@ Deploy with Firebase Hosting
 Firebase hosting offers hosting service for static (HTML/JS/CSS) and dynamic (Express) websites.
 We can link it to use a custom domain name.
 website : https://firebase.google.com/docs/hosting
- - install Firebase CLI to get the "firebase" command : 
+ - install Firebase CLI to get the "firebase" command :
    $>  npm install -g firebase-tools
  - login to our Google account :
    $>  firebase login
  - initialize our project in Firebase :
    $>  cd <project_path>
-   $>  firebase init 
+   $>  firebase init
        -> select "Hosting" with Space, then Enter
        -> select the Firebase project created earlier (or create a new one if didnt use Firebase earlier)
        -> for the folder, do not use "public", replace by the folder of our code (dist/recipe-app for me)
-       -> Single-page app : "y" 
+       -> Single-page app : "y"
        -> overwrite index.html: "N"
  - deploy the built files to Firebase :
    $>  firebase deploy
@@ -241,7 +242,7 @@ DATA BINDING
   <input (input)="onInputChange($event)" />
 
 - Two-way binding (.ts <=> .html)
-  Used for inputs, to update a prop if the input changes, and to update the input if the prop changes.  
+  Used for inputs, to update a prop if the input changes, and to update the input if the prop changes.
   Requires to import FormsModule in app-module.ts for the "ngModel" directive.
   <input type="text" [(ngModel)]="myStrVar">
 
@@ -292,7 +293,7 @@ There is no @Service() decorator, but we can use the @Injectable() decorator.
 It is technically required only if the service injects other services in its constructor.
 
 Angular can inject an instance of a service in a component from its constructor.
-The service needs to be specified in the "providers" list property of the @Component() decorator 
+The service needs to be specified in the "providers" list property of the @Component() decorator
 or one of its ancestors (the module for ex).
 
 When adding a service in the "providers" property of a @Component() directive, we inform Angular
@@ -346,7 +347,7 @@ Or as a parameter of a method call :
 The method onClick can now access the input element, so can access for ex its text value with :
   onClick(input: string) { console.log(input.value); }
 
-We can use a local reference instead of a property binding to make the code smaller when the 
+We can use a local reference instead of a property binding to make the code smaller when the
 value we bind to (an input usually) is used only from the template.
 
 We can also reference a local reference from the TS if we create a property with the decorator @ViewChild().
@@ -403,7 +404,7 @@ An Angular app is a single-page component but Angular offers routing possibiliti
 the user navigates across different pages, by changing the URL and displaying some specific components
 depending on the selected route.
 
-We can add routes and their associated components in app.module.ts : 
+We can add routes and their associated components in app.module.ts :
   routes : Routes = [
     { path: '', component: HomeComponent },           // localhost:4200
     { path: 'users', component: UsersComponent },     // localhost:4200/users
@@ -421,7 +422,7 @@ Angular directive to display the ccomponent of the selected route :
   <router-outlet><router-outlet>
 
 
-Router links 
+Router links
 ------------
 
 We need some links to navigate from one page to the other inside our app.
@@ -550,7 +551,7 @@ export class AuthenticationGuard implements CanActivate {
 
   constructor(private authService: AuthenticationService, private router: Router) {}
 
-  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) : 
+  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) :
       boolean | Observable<boolean> | Promise<boolean> {
     this.authService.isLoggedIn().then(
       (loggedIn : boolean) => {
@@ -965,7 +966,7 @@ Reactive approach lets us easily define our own validators.
 We just need to implement a validator function and pass it to our FormControl() constructor :
 
   blacklistedGuests = ['Bob', 'Alice'];
-  
+
   notBlacklisted(control: FormControl) : { [s: string]: boolean } {
     if (this.blacklistedGuests.indexOf(control.value) !== -1) {
       return { 'blacklistedName': true };
@@ -977,7 +978,7 @@ And when we declare our guest controller we add this new validator.
 ATTENTION !!  We need to bind "this" so JS knows what to use as this when it calls it !
 
   newControl = new FormControl(null, [Validators.required, this.notBlacklisted.bind(this)]);
-  
+
 Using error codes
 -----------------
 
@@ -1030,7 +1031,7 @@ Some pipes can take parameters, given after a ":" sign :
   {{ myDate | date: 'fullDate' }}  // show a date like 'Monday, August 12, 2017'
 
 Pipes can be chained :
-  {{ myDate | date: 'fullDate' | uppercase }} 
+  {{ myDate | date: 'fullDate' | uppercase }}
 
 
 To define a custom pipe :
@@ -1100,7 +1101,7 @@ this.http.get<Post>(backendApiUrl)
       return itemArray;
     }))
     .subscribe(posts => {
-      console.log(posts) 
+      console.log(posts)
     });
 
 To handle errors in the HTTP request, we can provide a 2nd param to the subscribe() method :
@@ -1109,7 +1110,7 @@ To handle errors in the HTTP request, we can provide a 2nd param to the subscrib
     posts => { console.log(posts); },
     error => { console.log(error.message); }
   );
-  
+
 To pass custom headers, we have an optional config object in all get/post/delete methods :
   this.get(url, { headers: new HttpHeader({ my-header: 'XXX' }) })
       .subscribe( responseData => { ... } );
@@ -1159,7 +1160,7 @@ An interceptor is a service implementing HttpInterceptor interface :
   export class AuthInterceptorService implements HttpInterceptor {
     intercept(req: HttpRequest<any>, next: HttpHandler) {
       // clone our HTTP request (req is immutable)
-      const myReq = req.clone({ 
+      const myReq = req.clone({
           headers: req.headers.append(auth, XXXX'}),     // if we want to add headers
           url: '<another URL>'                           // if we want to change the URL
       })
@@ -1200,7 +1201,7 @@ The backend then "knows" the client as long as the session is open.
 With Angular we cannot use this mechanism, since frontend and backend are totallyy decorrelated.
 They only communicate via HTTP calls.
 
-In Angular, once the client sends the credentials, the backend will generate a token from them, 
+In Angular, once the client sends the credentials, the backend will generate a token from them,
 encode it with a secret key only the backend knows, and sends it to the Angular frontend.
 Every time the client sends a request that needs authentication, it will attache this token.
 The backend will then validate that it is correct, and if it is accept to execute the request.
@@ -1243,7 +1244,7 @@ We cannot just use "new MyComponent()" because Angular needs more than just inst
 We need to use an Angular Component factory.
 Inject the ComponentFactoryResolver in the constructor, then instantiate the component like :
   const factory = this.componentFactoryResolver.resolveComponentFactory(MyComponent);
- 
+
 This factory needs to know where to create the component, which is given by a view container ref.
 It is obtained by creating a directive, inject in it the "ViewContainerRef" and make it a public porperty of the directive.
 Doing so, we can set this property to a <ng-template> in the HTML and access its view container ref to create the component here.
@@ -1292,9 +1293,9 @@ It can complete (like HTTP requests) or never complete (like intervals).
 We can subscribe to an Observable and give it a method to call on event, error and completion :
 
 this.route.params.subscribe(
-  (params: Params) => { console.log(params); }, 
-  (error)          => { console.log(error); }, 
-  ()               => { console.log("Completed"); }, 
+  (params: Params) => { console.log(params); },
+  (error)          => { console.log(error); },
+  ()               => { console.log("Completed"); },
 );
 
 If we create our own Observables, we need to unsubscribe from them in the OnDestroy().
@@ -1321,13 +1322,13 @@ this.route.params
 this.route.params
     .pipe(filter( (data) => { return (+data < 3); } ))
     .subscribe( (data) => { console.log(data); } )
-); 
+);
 
 - take(n) lets rxjs know that we want only n values from that observable.
   once we received the desired number of values, it automatically unsubscribes.
 
 - catchError() that lets us process any error sent by the observable.
-  it should throwError(error) if it wants to forward the error 
+  it should throwError(error) if it wants to forward the error
 
 Subjects
 --------
@@ -1365,7 +1366,7 @@ Bootstrap
 ---------
 
 Bootstrap offers a large selection of CSS classes to style our components easily.
-Install locally and save to package,json with :  
+Install locally and save to package,json with :
 npm install --save bootstrap@3
 npm install --save jquery
 
@@ -1378,7 +1379,7 @@ Then update the "styles" and "scripts" arrays in angular.json :
 	  "node_modules/jquery/dist/jquery.js",
 	  "node_modules/bootstrap/dist/js/bootstrap.js"
 	]
-			
+
 Useful class provided by bootstrap :
 
   container          space above and below, fixed width (depending on screen size), 15px padding
