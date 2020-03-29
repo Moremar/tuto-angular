@@ -11,6 +11,7 @@ import { Ingredient } from 'src/app/shared/ingredient.model';
 export const ADD_INGREDIENT = 'ADD_INGREDIENT';
 export const DELETE_INGREDIENT = 'DELETE_INGREDIENT';
 export const CLEAR_INGREDIENTS = 'CLEAR_INGREDIENTS';
+export const SELECT_INGREDIENT = 'SELECT_INGREDIENT';
 
 export class AddIngredientAction implements Action {
   // mandatory type for every action
@@ -28,4 +29,10 @@ export class ClearIngredientsAction implements Action {
   // mandatory type for every action
   readonly type = CLEAR_INGREDIENTS;
   constructor() {}
+}
+
+export class SelectIngredientAction implements Action {
+  // mandatory type for every action
+  readonly type = SELECT_INGREDIENT;
+  constructor(public payload: Ingredient) {}
 }

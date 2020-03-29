@@ -24,13 +24,22 @@ export class ShoppingEditComponent implements OnInit, OnDestroy {
   subscription: Subscription;
 
   ngOnInit() {
-    this.subscription = this.shoppingListService.ingredientSelected.subscribe(
+    this.subscription = this.shoppingListService.getSelectedIngredientObs().subscribe(
       (ing: Ingredient) => {
-        this.myShoppingForm.form.setValue({
-          ingredientName: ing.name,
-          ingredientAmount: ing.amount
-        });
+        // first time it is called, the form is not yet created
+        if (this.myShoppingForm) {
+          this.myShoppingForm.form.setValue({
+            ingredientName: ing ? ing.name : '',
+            ingredientAmount: ing ? ing.amount : ''
+          });
+          }
       });
+  }
+
+  // reset the form and unselect any ingredient
+  reset() {
+    this.shoppingListService.selectIngredient(null);
+    this.myShoppingForm.reset();
   }
 
   onAdd() {
@@ -39,18 +48,18 @@ export class ShoppingEditComponent implements OnInit, OnDestroy {
     const amount = this.myShoppingForm.value.ingredientAmount;
     const newIng = new Ingredient(name, amount);
     this.shoppingListService.addIngredient(newIng);
-    this.myShoppingForm.reset();
+    this.reset();
   }
 
   onDelete() {
     const name = this.myShoppingForm.value.ingredientName;
     this.shoppingListService.deleteIngredient(name);
-    this.myShoppingForm.reset();
+    this.reset();
   }
 
   onClear() {
     this.shoppingListService.clearIngredients();
-    this.myShoppingForm.reset();
+    this.reset();
   }
 
   ngOnDestroy() {

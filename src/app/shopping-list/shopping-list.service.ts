@@ -5,7 +5,8 @@ import { map, take } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
 
 import { Ingredient } from '../shared/ingredient.model';
-import { AddIngredientAction, DeleteIngredientAction, ClearIngredientsAction } from './store/shopping-list.actions';
+import { AddIngredientAction, DeleteIngredientAction, ClearIngredientsAction, SelectIngredientAction } from './store/shopping-list.actions';
+import { ShoppingListState, AppState } from './store/shopping-list.reducer';
 
 
 @Injectable({
@@ -17,18 +18,26 @@ export class ShoppingListService {
   // the auth token is added to the request by the AuthInterceptor
   private firebaseUrl = 'https://myrecipes-6270c.firebaseio.com/ingredients.json';
 
-  // subscribe to know which ingredient got selected
-  ingredientSelected = new Subject<Ingredient>();
-
   constructor(
     private http: HttpClient,
-    private store: Store<{shoppingList: {ingredients: Ingredient[]}}>) {}
+    private store: Store<AppState>) {}
 
 
+  // get an observable on the ingredients in the store
   getIngredientsObs() {
     return this.store.select('shoppingList').pipe(
-      map((shoppingListStore) => shoppingListStore.ingredients)
+      map((shoppingListState: ShoppingListState) => shoppingListState.ingredients)
     );
+  }
+
+  getSelectedIngredientObs() {
+    return this.store.select('shoppingList').pipe(
+      map((shoppingListState: ShoppingListState) => shoppingListState.selectedIngredient)
+    );
+  }
+
+  selectIngredient(ingredient: Ingredient) {
+    this.store.dispatch(new SelectIngredientAction(ingredient));
   }
 
   deleteIngredient(ingredientName: string) {

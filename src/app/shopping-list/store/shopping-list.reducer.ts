@@ -1,4 +1,4 @@
-import { AddIngredientAction, DeleteIngredientAction } from './shopping-list.actions';
+import { AddIngredientAction, DeleteIngredientAction, SELECT_INGREDIENT, SelectIngredientAction } from './shopping-list.actions';
 import { ADD_INGREDIENT, DELETE_INGREDIENT, CLEAR_INGREDIENTS } from './shopping-list.actions';
 import { Ingredient } from 'src/app/shared/ingredient.model';
 import { Action } from '@ngrx/store';
@@ -12,18 +12,30 @@ import { Action } from '@ngrx/store';
  * The reducer will only perform an action if it is an action it cares about.
  */
 
+// state of the entire app
+export interface AppState {
+  shoppingList: ShoppingListState;
+}
+
+// state of the shopping list section
+export interface ShoppingListState {
+  ingredients: Ingredient[];
+  selectedIngredient: Ingredient;
+}
+
 // define an initial state
-const initialState = {
+const initialState: ShoppingListState = {
   ingredients: [
     new Ingredient('Potato', 2),
     new Ingredient('Tomato', 3),
-  ]
+  ],
+  selectedIngredient: null
 };
 
 // reducer function
 // the default value of state is used at state initialization
 export function ShoppingListReducer(
-      state = initialState,
+      state: ShoppingListState = initialState,
       action: Action) {
   console.log(action);
   switch (action.type) {
@@ -67,7 +79,9 @@ export function ShoppingListReducer(
         // copy all properties of state into the new object
         ...state,
         // overwrite the properties we want to change
-        ingredients: ingredients
+        ingredients: ingredients,
+        // unselect any selected ingredient
+        selectedIngredient: null
       };
     }
 
@@ -76,7 +90,19 @@ export function ShoppingListReducer(
         // copy all properties of state into the new object
         ...state,
         // clear the ingredients array
-        ingredients: []
+        ingredients: [],
+        // unselect any selected ingredient
+        selectedIngredient: null
+      };
+    }
+
+    case SELECT_INGREDIENT: {
+      const selectAction = action as SelectIngredientAction;
+      return {
+        // copy all properties of state into the new object (ingredients)
+        ...state,
+        // select the new ingredient (or null to unselect)
+        selectedIngredient: selectAction.payload
       };
     }
 
