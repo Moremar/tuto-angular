@@ -16,7 +16,7 @@
             <div class="row">
                 <div class="col-md-12">
                     <button class="btn btn-success" type="submit" [disabled]="myShoppingForm.invalid">Add</button>
-                    <button class="btn btn-danger" type="button" (click)="onDelete()">Delete</button>
+                    <button class="btn btn-danger" type="button" [disabled]="!myShoppingForm.value.ingredientName" (click)="onDelete()">Delete</button>
                     <button class="btn btn-primary" type="button" (click)="onClear()">Clear</button>
                 </div>
             </div>
