@@ -1,9 +1,11 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Subject } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, take } from 'rxjs/operators';
+import { Store } from '@ngrx/store';
 
 import { Ingredient } from '../shared/ingredient.model';
+import { AddIngredientAction, DeleteIngredientAction, ClearIngredientsAction } from './store/shopping-list.actions';
 
 
 @Injectable({
@@ -15,64 +17,30 @@ export class ShoppingListService {
   // the auth token is added to the request by the AuthInterceptor
   private firebaseUrl = 'https://myrecipes-6270c.firebaseio.com/ingredients.json';
 
-  private ingredients: Ingredient[] = [
-    new Ingredient('Apples', 5),
-    new Ingredient('Tomatoes', 10),
-  ];
+  // subscribe to know which ingredient got selected
+  ingredientSelected = new Subject<Ingredient>();
 
-  // subscribe to be notified when the ingredients list changes
-  // ingredientsUpdated = new EventEmitter<void>();  // works but better to use Subject
-  ingredientsUpdated = new Subject<void>();
+  constructor(
+    private http: HttpClient,
+    private store: Store<{shoppingList: {ingredients: Ingredient[]}}>) {}
 
-  // subscribe to know which ingredient is being edited
-  ingredientSelected = new Subject<number>();
 
-  constructor(private http: HttpClient) {}
-
-  getIngredients() {
-    return this.ingredients.slice();
-  }
-
-  // we identify an ingredient by its index in the array
-  getIngredient(i: number) {
-    return this.ingredients[i].clone();
+  getIngredientsObs() {
+    return this.store.select('shoppingList').pipe(
+      map((shoppingListStore) => shoppingListStore.ingredients)
+    );
   }
 
   deleteIngredient(ingredientName: string) {
-    for (let i = 0; i < this.ingredients.length; i++) {
-      if (this.ingredients[i].name === ingredientName) {
-        // found the ingredient in the list, remove it
-        this.ingredients.splice(i, 1);
-
-        // this.ingredientsUpdated.emit();  // if using an EventEmitter
-        this.ingredientsUpdated.next();
-        return;
-      }
-    }
+    this.store.dispatch(new DeleteIngredientAction(ingredientName));
   }
 
   addIngredient(ingredient: Ingredient) {
-    console.log('TIBO - ADD ingredient ' + ingredient.name);
-    if (ingredient.name === '' || ingredient.amount === 0) {
-      // invalid input, ignore it
-      return;
-    }
-    for (const ing of this.ingredients) {
-      if (ing.name === ingredient.name) {
-        // found the ingredient in the list, add its amount
-        ing.amount += ingredient.amount;
-        this.ingredientsUpdated.next();
-        return;
-      }
-    }
-    // if we reach here, the ingredient was not in the list, so we add it
-    this.ingredients.push(ingredient.clone());
-    this.ingredientsUpdated.next();
+    this.store.dispatch(new AddIngredientAction(ingredient));
   }
 
   clearIngredients() {
-    this.ingredients = [];
-    this.ingredientsUpdated.next();
+    this.store.dispatch(new ClearIngredientsAction());
   }
 
   /*
@@ -107,13 +75,17 @@ export class ShoppingListService {
   private persistIngredientsInFirebase() {
     // Save 1 by 1 all ingredients in Firebase
     // The "ingredients" folder is created in Firebase if missing
-    for (const ing of this.ingredients) {
-      const postReq = this.http.post(this.firebaseUrl, ing);
-      postReq.subscribe( (data: {name: string}) => {
-        console.log('Posted ingredient ' + ing.name + ' :');
-        console.log(data);
-      });
-    }
+    this.getIngredientsObs().pipe(take(1)).subscribe(
+      (ingredients: Ingredient[]) => {
+        for (const ing of ingredients) {
+          const postReq = this.http.post(this.firebaseUrl, ing);
+          postReq.subscribe( (data: {name: string}) => {
+            console.log('Posted ingredient ' + ing.name + ' :');
+            console.log(data);
+          });
+        }
+      }
+    );
   }
 
   /*
@@ -136,12 +108,11 @@ export class ShoppingListService {
           return ingredients;
         }))
         .subscribe(ingredients => {
-          console.log(ingredients);
-          this.ingredients = ingredients.sort(
-            (ing1, ing2): number => ing1.amount - ing2.amount
-          );
-          this.ingredientsUpdated.next();
+          this.clearIngredients();
+          const sortedIngredients = ingredients.sort((a, b): number => a.amount - b.amount);
+          for (const ing of sortedIngredients) {
+            this.addIngredient(ing);
+          }
         });
   }
-
 }

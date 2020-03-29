@@ -5,6 +5,7 @@ import { Subscription } from 'rxjs';
 import { ShoppingListService } from '../shopping-list.service';
 import { Ingredient } from 'src/app/shared/ingredient.model';
 
+
 @Component({
   selector: 'app-shopping-edit',
   templateUrl: './shopping-edit.component.html',
@@ -14,7 +15,7 @@ export class ShoppingEditComponent implements OnInit, OnDestroy {
 
   @ViewChild('myShoppingForm') myShoppingForm: NgForm;
 
-  constructor(private shoppingListService: ShoppingListService) { }
+  constructor(private shoppingListService: ShoppingListService) {}
 
   // if an ingredient is being edited (-1 if nothing edited)
   editedIngredientId = -1;
@@ -24,9 +25,7 @@ export class ShoppingEditComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.subscription = this.shoppingListService.ingredientSelected.subscribe(
-      (index: number) => {
-        this.editedIngredientId = index;
-        const ing = this.shoppingListService.getIngredient(index);
+      (ing: Ingredient) => {
         this.myShoppingForm.form.setValue({
           ingredientName: ing.name,
           ingredientAmount: ing.amount

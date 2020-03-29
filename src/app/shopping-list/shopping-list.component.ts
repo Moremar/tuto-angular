@@ -12,16 +12,13 @@ export class ShoppingListComponent implements OnInit, OnDestroy {
   ingredients: Ingredient[] = [];
   ingredientsSubscription: Subscription;
 
-  constructor(private shoppingListService: ShoppingListService) { }
+  constructor(private shoppingListService: ShoppingListService) {}
 
   ngOnInit() {
-    this.ingredients = this.shoppingListService.getIngredients();
-
-    // listener to refresh the local ingredients list when it changes
-    this.ingredientsSubscription =
-        this.shoppingListService.ingredientsUpdated.subscribe(
-          () => { this.ingredients = this.shoppingListService.getIngredients(); }
-        );
+    this.ingredientsSubscription = this.shoppingListService.getIngredientsObs().subscribe(
+      (ingredients: Ingredient[]) => {
+        this.ingredients = ingredients;
+      });
   }
 
   ngOnDestroy(): void {
@@ -34,6 +31,6 @@ export class ShoppingListComponent implements OnInit, OnDestroy {
   }
 
   onIngredientSelected(index: number) {
-    this.shoppingListService.ingredientSelected.next(index);
+    this.shoppingListService.ingredientSelected.next(this.ingredients[index]);
   }
 }

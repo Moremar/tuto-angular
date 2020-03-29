@@ -1284,6 +1284,84 @@ Then we can set the input and output bindings by using the "instance" of the new
     );
 
 
+STATE MANAGEMENT WITH REDUX
+---------------------------
+
+Application state contains all not-persistent information used to know what should
+be displayed (loading, tab selected, just sent a file, ...).
+We can handle state only with services and components, by having a service that publish
+state change (with a Subject) and components subscribing to it.
+
+For bigger apps, having one centralized place to manage the application state makes the
+code easier to read and maintain. We can use Redux for this.
+
+Redux is a pattern to manage state, using a central JS object called "store" that will
+be the source of truth for services/components regarding the application state.
+
+To update the state (for ex add a recipe), we cannot modify the store directly.
+We need to create an action that defines how to change the store, and add an optional payload.
+This action is processed by a "reducer" that will calculate the resulting state, and will
+overwrite the current store with the new state.
+This implies that every change of the state creates a new version of the store.
+The new state is then received by every component needing it by a subscription.
+
+The angular wrapper for Redux is called "NgRx" and implements this Redux pattern using
+rxjs (Subjects) and making it easy to subscribe to the store from a service.
+
+Install with:  $>  npm install --save @ngrx/store
+
+Actions
+-------
+An action must be defined for each type of change we can do on the store.
+We can group actions in an xxx.actions.ts file.
+Actions must implement the "Action" interface by providing a "type" property:
+
+export class AddIngredientAction implements Action {
+  readonly type = ADD_INGREDIENT;
+  payload: Ingredient;
+}
+
+Reducers
+--------
+Reducers are functions that will be called by Redux to compute the next state.
+Redux provides the original state and the triggered action.
+Create a file xxx.reducer.ts and define a reducer function :
+
+  export function ShoppingListReducer(
+      state = initialState,
+      action: AddIngredientAction) {
+    switch (action.type) {
+      case ADD_INGREDIENT:
+      return {
+        // copy all properties of state into the new object
+        ...state,
+        // overwrite the properties we want to change
+        ingredients: [...state.ingredients, action.payload]
+      };
+  }
+
+Store
+-----
+Import in the app.module.ts the StoreModule and list its reducers :
+    StoreModule.forRoot({ shoppingList: ShoppingListReducer })
+With this setup, NgRx creates an application store with the given reducers.
+We can access it by injecting in a module/component an object of class Store.
+Store is generic, and needs to specify the actual full type of the store :
+      private store: Store<{shoppingList: {ingredients: Ingredient[]}}>
+
+Then we can access the observable for a sub-store with :
+  this.subscription = this.store.select('shoppingList').subscribe(
+    (shoppingListStore: {ingredients: Ingredient[]}) => {
+      this.ingredients = shoppingListStore.ingredients;
+    });
+
+Call an action
+--------------
+Inject the Store and call its dispatch() method :
+  this.store.dispatch(new AddIngredientAction(payload));
+This will automatically be executed by all reducers.
+
+
 Bonus JS : Observables
 ----------------------
 

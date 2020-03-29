@@ -1,6 +1,7 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { StoreModule } from '@ngrx/store';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -12,6 +13,7 @@ import { AlertComponent } from './shared/alert/alert.component';
 import { ShoppingListModule } from './shopping-list/shopping-list.module';
 import { SharedModule } from './shared/shared.module';
 import { AuthModule } from './auth/auth.module';
+import { ShoppingListReducer } from './shopping-list/store/shopping-list.reducer';
 
 
 /* If no custom routing module, add the routes here  */
@@ -42,7 +44,11 @@ import { AuthModule } from './auth/auth.module';
 //    RecipesModule,
     ShoppingListModule,
     AuthModule,
-    AppRoutingModule
+    AppRoutingModule,
+    // Redux store module, taking a map of store section/reducers
+    StoreModule.forRoot({
+      shoppingList: ShoppingListReducer
+    })
   ],
   providers: [{
     provide: HTTP_INTERCEPTORS,
