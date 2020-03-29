@@ -6,7 +6,8 @@ import { Store } from '@ngrx/store';
 
 import { Ingredient } from '../shared/ingredient.model';
 import { AddIngredientAction, DeleteIngredientAction, ClearIngredientsAction, SelectIngredientAction } from './store/shopping-list.actions';
-import { ShoppingListState, AppState } from './store/shopping-list.reducer';
+import { ShoppingListState } from './store/shopping-list.reducer';
+import { AppState } from '../app.state';
 
 
 @Injectable({

@@ -1,10 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError, BehaviorSubject } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
+import { catchError, tap, map } from 'rxjs/operators';
+import { Store } from '@ngrx/store';
 
 import { User } from './user.model';
 import { Router } from '@angular/router';
+import { AppState } from '../app.state';
+import { AuthState } from './store/auth.reducer';
+import { LoginAction, LogoutAction } from './store/auth.actions';
 
 // To access environment variables
 // The prod or QA is automatically selected by Angular
@@ -40,31 +44,41 @@ interface AuthResponse {
 export class AuthService {
 
   // Key identifying a project in Firebase, needs to be included in every Auth API call
-  FIREBASE_AUTH_API_KEY = environment.firebaseApiKey;
-
-  // store the authenticated user as a Subject (to react when it changes)
-  // that is great when we want the UI to react to the user change, for ex to change the links in the header
-  userSubject = new BehaviorSubject<User>(null);
-
-  // store the current user
-  // that is great for on-demand auth info, for ex when sending an HTTP request that needs the auth token
-  user: User = null;
+  private FIREBASE_AUTH_API_KEY = environment.firebaseApiKey;
 
   // handle to automatically logout after the auth token expires
-  logoutHandle = null;
+  private logoutHandle = null;
+
+  // token of the currently logged user
+  private token: string = null;
 
   constructor(
         private http: HttpClient,
-        private router: Router) {}
+        private router: Router,
+        private store: Store<AppState>) {
+    // get the user token when there is a change in the logged user
+    this.getUserObs().subscribe(
+      (user: User) => {
+        this.token = user ? user.token : null;
+        console.log('Setting token to : ');
+        console.log(this.token);
+      }
+    );
+  }
 
 
   getToken() {
-    if (this.user === null) {
-      return null;
-    } else {
-      return this.user.token;
-    }
+    return this.token;
   }
+
+
+  // get an observable on the logged user
+  getUserObs() {
+    return this.store
+        .select('auth')
+        .pipe(map((authState: AuthState) => authState ? authState.user : null));
+  }
+
 
   // common code for signup and login, only the URL differs
   private createAuthObservable(authUrl: string, email: string, password: string): Observable<AuthResponse> {
@@ -107,12 +121,12 @@ export class AuthService {
       (responseData) => {
         // "expiresIn" is a number of seconds, so buid the expiration from it
         const expirationDate = new Date(new Date().getTime() + (+responseData.expiresIn) * 1000);
-        this.user = new User(responseData.email, responseData.localId, responseData.idToken, expirationDate);
-        this.userSubject.next(this.user);
+        const user = new User(responseData.email, responseData.localId, responseData.idToken, expirationDate);
+        this.store.dispatch(new LoginAction(user));
         this.scheduleLogout(+responseData.expiresIn * 1000);
 
         // store the user to local storage so we can access it even if we reload the page
-        localStorage.setItem('user', JSON.stringify(this.user));
+        localStorage.setItem('user', JSON.stringify(user));
       }
     ));
   }
@@ -144,11 +158,11 @@ export class AuthService {
     // all fields are strings when retrieved from JSON, we need to convert the Date ourselves !
     const localUser = JSON.parse(localStorage.getItem('user'));
     console.log('Got from local storage = ');
-    console.log(this.user);
+    console.log(localUser);
     if (localUser) {
       const expirationDate = new Date(localUser._tokenExpirationDate);
-      this.user = new User(localUser.email, localUser.userId, localUser._token, expirationDate);
-      this.userSubject.next(this.user);
+      const user = new User(localUser.email, localUser.userId, localUser._token, expirationDate);
+      this.store.dispatch(new LoginAction(user));
       const expireIn = expirationDate.getTime() - new Date().getTime();
       this.scheduleLogout(expireIn);
     }
@@ -158,14 +172,15 @@ export class AuthService {
    * Invalidate the current authenticated user
    */
   logout() {
-    this.user = null;
-    this.userSubject.next(this.user);
+    this.store.dispatch(new LogoutAction());
     localStorage.removeItem('user');
-    this.router.navigate(['/login']);
 
     // prevent the scheduled logout to happen
     clearTimeout(this.logoutHandle);
     this.logoutHandle = null;
+
+    // re-route to login screen
+    this.router.navigate(['/login']);
   }
 
   /**

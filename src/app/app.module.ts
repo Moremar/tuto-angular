@@ -14,6 +14,7 @@ import { ShoppingListModule } from './shopping-list/shopping-list.module';
 import { SharedModule } from './shared/shared.module';
 import { AuthModule } from './auth/auth.module';
 import { ShoppingListReducer } from './shopping-list/store/shopping-list.reducer';
+import { AuthReducer } from './auth/store/auth.reducer';
 
 
 /* If no custom routing module, add the routes here  */
@@ -47,7 +48,8 @@ import { ShoppingListReducer } from './shopping-list/store/shopping-list.reducer
     AppRoutingModule,
     // Redux store module, taking a map of store section/reducers
     StoreModule.forRoot({
-      shoppingList: ShoppingListReducer
+      shoppingList: ShoppingListReducer,
+      auth: AuthReducer
     })
   ],
   providers: [{

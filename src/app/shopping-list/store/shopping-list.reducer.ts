@@ -1,10 +1,11 @@
+import { Action } from '@ngrx/store';
+
 import { AddIngredientAction, DeleteIngredientAction, SELECT_INGREDIENT, SelectIngredientAction } from './shopping-list.actions';
 import { ADD_INGREDIENT, DELETE_INGREDIENT, CLEAR_INGREDIENTS } from './shopping-list.actions';
 import { Ingredient } from 'src/app/shared/ingredient.model';
-import { Action } from '@ngrx/store';
 
 /**
- * Reducer for NgRx
+ * Reducer for the ShopppingList related actions of the Redux state
  *
  * We can define an initial state that will be used at NgRx initialization.
  * We must define the reducer function that takes the previous state and the
@@ -12,10 +13,6 @@ import { Action } from '@ngrx/store';
  * The reducer will only perform an action if it is an action it cares about.
  */
 
-// state of the entire app
-export interface AppState {
-  shoppingList: ShoppingListState;
-}
 
 // state of the shopping list section
 export interface ShoppingListState {
