@@ -1309,6 +1309,7 @@ The angular wrapper for Redux is called "NgRx" and implements this Redux pattern
 rxjs (Subjects) and making it easy to subscribe to the store from a service.
 
 Install with:  $>  npm install --save @ngrx/store
+               $>  npm install --save @ngrx/effects   (for side effects)
 
 Actions
 -------
@@ -1360,6 +1361,59 @@ Call an action
 Inject the Store and call its dispatch() method :
   this.store.dispatch(new AddIngredientAction(payload));
 This will automatically be executed by all reducers.
+
+Side effects
+------------
+The reducers should not contain any side effects, they should only set the state.
+NgRx offers a way to handle side effects (REST calls, local storage management).
+We can create some new effect actions in xxx.actions.ts, that do not update the state but trigger effects.
+Actions updating the state are handled in the reducer files.
+Actions triggering effects are handled in a xxx.effects.ts file.
+The xxxEffects class needs @Injectable() decorator, and its constructor injects the Actions object
+(from ngrx/effects, usually called "actions$").
+This lets us react to some actions, and trigger another action if needed.
+We create effect observables (with @Effect() decorator) that NgRx will automatically call when
+an action of one (or several) given types is dispatched :
+
+  @Effect({dispatch: true / false})
+  myEffect = this.actions$.pipe(
+        ofType(MY_ACTION),         // filter on a given action (or set of actions)
+        // IF NO ACTION TO DISPATCH
+        tap( (myAction: xxxAction) => { ... } )
+        // IF ACTION TO DISPATCH SYNCHRONOUSLY
+        map( myAction: xxxAction => {
+          ... my sync effects ...
+          // then return an action
+          return new yyyAction(params));
+        })
+        // IF ACTION TO DISPATCH ASYNCHRONOUSLY
+        switchMap(                 // replace by another observable
+          myAction: xxxAction => {
+            this.http
+            .post<TYPE>(url, params)
+            .pipe(
+              map( myHttpRes => {   // applied on success
+                // return the next action to trigger (ngrx dispatches it)
+                return new yyyAction(params);
+              }),
+              catchError( err =>{  // MUST return a valid observable to not kill the effect observable
+                 return of( new NoAction() );
+              }
+            )
+          })
+  );
+
+We can create effects that do not displatch another action, for ex if we just want to navigate
+to a page when an action is triggered.
+We need to specify it in the @Effect() decorator:
+  @Effect({ dispatch: false })
+  myEffect = this.actions$.pipe(
+    ofType(MY_ACTION),
+    tap( action => { this.router.navigate(URL); } )
+  )
+
+In the app.module.ts, we need to import module EffectsModule and set our effects class:
+   EffectsModule.forRoot([xxxEffects])
 
 
 Bonus JS : Observables

@@ -1,14 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Observable, throwError, BehaviorSubject } from 'rxjs';
+import { Router } from '@angular/router';
+import { Observable, throwError } from 'rxjs';
 import { catchError, tap, map } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
 
 import { User } from './user.model';
-import { Router } from '@angular/router';
 import { AppState } from '../app.state';
 import { AuthState } from './store/auth.reducer';
-import { LoginAction, LogoutAction } from './store/auth.actions';
+import { LoginAction, LogoutAction, EffectAutoLoginAction, EffectSaveUserAction } from './store/auth.actions';
 
 // To access environment variables
 // The prod or QA is automatically selected by Angular
@@ -21,6 +21,9 @@ import { environment } from '../../environments/environment';
  *  - create users (signup)
  *  - get a token (login)
  *  - deactivate the token (logout)
+ *
+ * It uses local storage to store locally the user for the duration of the token.
+ * The local storage management is done by NgRx side-effects.
  *
  * In this example, we use Firebase for the backend, so we use the Firebase Auth API :
  * https://firebase.google.com/docs/reference/rest/auth
@@ -59,9 +62,8 @@ export class AuthService {
     // get the user token when there is a change in the logged user
     this.getUserObs().subscribe(
       (user: User) => {
+        console.log('Updating auth token in memory');
         this.token = user ? user.token : null;
-        console.log('Setting token to : ');
-        console.log(this.token);
       }
     );
   }
@@ -123,10 +125,12 @@ export class AuthService {
         const expirationDate = new Date(new Date().getTime() + (+responseData.expiresIn) * 1000);
         const user = new User(responseData.email, responseData.localId, responseData.idToken, expirationDate);
         this.store.dispatch(new LoginAction(user));
-        this.scheduleLogout(+responseData.expiresIn * 1000);
 
         // store the user to local storage so we can access it even if we reload the page
-        localStorage.setItem('user', JSON.stringify(user));
+        this.store.dispatch(new EffectSaveUserAction(user));
+
+        // schedule auto-logout at token expiration
+        this.scheduleLogout(+responseData.expiresIn * 1000);
       }
     ));
   }
@@ -153,27 +157,24 @@ export class AuthService {
     return this.createAuthObservable(loginUrl, email, password);
   }
 
+
+  /**
+   * Try to automatically login from the user stored in local storage
+   */
   autoLogin() {
-    // read the current authenticated user in the local storage
-    // all fields are strings when retrieved from JSON, we need to convert the Date ourselves !
-    const localUser = JSON.parse(localStorage.getItem('user'));
-    console.log('Got from local storage = ');
-    console.log(localUser);
-    if (localUser) {
-      const expirationDate = new Date(localUser._tokenExpirationDate);
-      const user = new User(localUser.email, localUser.userId, localUser._token, expirationDate);
-      this.store.dispatch(new LoginAction(user));
-      const expireIn = expirationDate.getTime() - new Date().getTime();
-      this.scheduleLogout(expireIn);
-    }
+    console.log('Try to auto-login');
+    this.store.dispatch(new EffectAutoLoginAction());
   }
+
 
   /**
    * Invalidate the current authenticated user
    */
   logout() {
+    // the logout action will be intercepted by :
+    // - the reducer to remove the user from the state
+    // - the side effects to remove the user from local storage
     this.store.dispatch(new LogoutAction());
-    localStorage.removeItem('user');
 
     // prevent the scheduled logout to happen
     clearTimeout(this.logoutHandle);
@@ -182,6 +183,7 @@ export class AuthService {
     // re-route to login screen
     this.router.navigate(['/login']);
   }
+
 
   /**
    * once we get a token we need to schedule a logout when the token expires

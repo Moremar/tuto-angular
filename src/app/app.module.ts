@@ -2,6 +2,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { StoreModule } from '@ngrx/store';
+import { EffectsModule } from '@ngrx/effects';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -15,6 +16,7 @@ import { SharedModule } from './shared/shared.module';
 import { AuthModule } from './auth/auth.module';
 import { ShoppingListReducer } from './shopping-list/store/shopping-list.reducer';
 import { AuthReducer } from './auth/store/auth.reducer';
+import { AuthEffects } from './auth/store/auth.effects';
 
 
 /* If no custom routing module, add the routes here  */
@@ -50,7 +52,9 @@ import { AuthReducer } from './auth/store/auth.reducer';
     StoreModule.forRoot({
       shoppingList: ShoppingListReducer,
       auth: AuthReducer
-    })
+    }),
+    // Redux module for handling side-effects
+    EffectsModule.forRoot([AuthEffects])
   ],
   providers: [{
     provide: HTTP_INTERCEPTORS,

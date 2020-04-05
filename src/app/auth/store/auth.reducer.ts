@@ -1,6 +1,6 @@
 import { Action } from '@ngrx/store';
 
-import { USER_LOGIN, USER_LOGOUT, LoginAction } from './auth.actions';
+import { AUTH_LOGIN, AUTH_LOGOUT, LoginAction } from './auth.actions';
 import { User } from '../user.model';
 
 
@@ -21,7 +21,7 @@ export function AuthReducer(
   console.log(action);
   switch (action.type) {
 
-    case USER_LOGIN: {
+    case AUTH_LOGIN: {
       const loginAction = action as LoginAction;
       return {
         ...state,
@@ -30,7 +30,7 @@ export function AuthReducer(
       };
     }
 
-    case USER_LOGOUT: {
+    case AUTH_LOGOUT: {
       return {
         ...state,
         // reset the logged user

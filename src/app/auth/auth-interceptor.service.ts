@@ -20,6 +20,7 @@ export class AuthInterceptor implements HttpInterceptor {
         const authReq = req.clone({
             params: req.params.append('auth', this.authService.getToken())
         });
+        // can either call it directly or from a callback of a promise/observable
         return next.handle(authReq);
     }
 }

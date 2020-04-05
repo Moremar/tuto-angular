@@ -95,6 +95,7 @@ export class AuthComponent implements OnInit, OnDestroy {
     );
   }
 
+  // only used with static error modal
   onCloseAlert() {
     this.errorMessage = null;
   }
