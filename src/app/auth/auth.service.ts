@@ -186,7 +186,7 @@ export class AuthService {
 
 
   /**
-   * once we get a token we need to schedule a logout when the token expires
+   * when we get an auth token, we need to schedule a logout when the token expires
    */
   scheduleLogout(millis: number) {
     console.log('token will be invalidated in ' + millis + ' ms');

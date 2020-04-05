@@ -1415,6 +1415,26 @@ We need to specify it in the @Effect() decorator:
 In the app.module.ts, we need to import module EffectsModule and set our effects class:
    EffectsModule.forRoot([xxxEffects])
 
+NgRx dev tools
+--------------
+We can use a chrome extension to debug our Redux state.
+This extension shows all actions triggered, and the state after each of them.
+ -> Download the "Redux DevTools" Chrome extension
+ -> Install the ngrx dev tool package as a dev dependency :
+      $>  npm install --save-dev @ngrx/store-devtools
+ -> In app.module.ts, import StoreDevToolsModule :
+      StoreDevToolsModule.instrument({ logOnly: environment.production })
+ -> Relaunch Chrome and "ng serve", now we have a "Redux" section in the chrome dev tools.
+
+Another useful NgRx feature is the Router Store.
+It triggers an NgRx action everytime the Angular router navigates to a page.
+This lets us change the state of the app on routing events.
+To use it, install the router store package :
+      $>  npm install --save @ngrx/router-store
+Then add in the imports of the app.module.ts :
+      StoreRouterConnectingModule.forRoot(),
+Now after "ng serve" the redux chrome extension should show an action at every routing event.
+
 
 Bonus JS : Observables
 ----------------------

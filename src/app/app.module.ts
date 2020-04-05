@@ -3,6 +3,8 @@ import { NgModule } from '@angular/core';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
+import { StoreDevtoolsModule } from '@ngrx/store-devtools';
+import { StoreRouterConnectingModule } from '@ngrx/router-store';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -17,6 +19,7 @@ import { AuthModule } from './auth/auth.module';
 import { ShoppingListReducer } from './shopping-list/store/shopping-list.reducer';
 import { AuthReducer } from './auth/store/auth.reducer';
 import { AuthEffects } from './auth/store/auth.effects';
+import { environment } from 'src/environments/environment';
 
 
 /* If no custom routing module, add the routes here  */
@@ -54,7 +57,11 @@ import { AuthEffects } from './auth/store/auth.effects';
       auth: AuthReducer
     }),
     // Redux module for handling side-effects
-    EffectsModule.forRoot([AuthEffects])
+    EffectsModule.forRoot([AuthEffects]),
+    // Module to see the Redux store in Chrome plugin
+    StoreDevtoolsModule.instrument({ logOnly: environment.production }),  // if prod, only log
+    // Module to trigger a Redux Action on angular router navigation
+    StoreRouterConnectingModule.forRoot(),
   ],
   providers: [{
     provide: HTTP_INTERCEPTORS,
