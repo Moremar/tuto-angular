@@ -29,11 +29,16 @@ export class RecipeEditComponent implements OnInit {
     const PARAM_ID = 'id';
     this.route.params.subscribe(
       (params: Params) => {
-        this.recipeId = (PARAM_ID in params) ? params[PARAM_ID] : -1;
+        this.recipeId = (PARAM_ID in params) ? +params[PARAM_ID] : -1;
         this.editExisting = (this.recipeId !== -1);
         this.buttonLabel = this.editExisting ? 'Update' : 'Create';
         if (this.editExisting) {
-          this.recipe = this.recipesService.getRecipe(this.recipeId);
+          // fetch the recipe with this ID
+          this.recipesService.getRecipeObs(this.recipeId).subscribe(
+            (recipe: Recipe) => {
+              this.recipe = recipe.clone();
+            }
+          );
         } else {
           this.recipe = new Recipe();
         }
@@ -67,19 +72,13 @@ export class RecipeEditComponent implements OnInit {
 
   onSubmit() {
     this.keepChangesInRecipe();
-
-    console.log('Submit');
     console.log(this.myRecipeForm);
     if (this.editExisting) {
-      console.log('Edit existing !');
       console.log(this.recipeId);
       console.log(this.recipe);
       this.recipesService.updateRecipe(this.recipe);
-      this.router.navigate(['recipes', this.recipeId]);
     } else {
-      console.log('Create new !');
-      const newRecipeId = this.recipesService.createRecipe(this.recipe);
-      this.router.navigate(['recipes', newRecipeId]);
+      this.recipesService.createRecipe(this.recipe);
     }
   }
 

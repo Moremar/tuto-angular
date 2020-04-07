@@ -11,8 +11,8 @@ import { Router, ActivatedRoute, Params } from '@angular/router';
 })
 export class RecipeDetailComponent implements OnInit {
 
-  recipeId: number;
-  recipe: Recipe;
+  // Recipe being displayed (public for the HTML to use it)
+  public recipe: Recipe;
 
   constructor(private recipesService: RecipesService,
               private shoppingListRecipe: ShoppingListService,
@@ -23,16 +23,14 @@ export class RecipeDetailComponent implements OnInit {
     const PARAM_ID = 'id';
     this.route.params.subscribe(
       (params: Params) => {
-        this.recipeId = +params[PARAM_ID];
-        this.recipe = this.recipesService.getRecipe(this.recipeId);
-        if (this.recipe.id === -1) {
-          // invalid ID in the URL, move to Home
-          console.log('DEBUG : Invalid recipe, back to home.');
-          this.router.navigate(['']);
-        }
+        const recipeId = +params[PARAM_ID];
+        this.recipesService.getRecipeObs(recipeId).subscribe(
+          (recipe: Recipe) => {
+            this.recipe = recipe;
+          }
+        );
       }
     );
-
   }
 
   onAddToShoppingList() {
@@ -46,7 +44,7 @@ export class RecipeDetailComponent implements OnInit {
   }
 
   onDeleteRecipe() {
-    this.recipesService.deleteRecipe(this.recipeId);
+    this.recipesService.deleteRecipe(this.recipe.id);
     this.router.navigate(['']);  // the current recipe was deleted so back to home
   }
 }

@@ -12,23 +12,22 @@ import { Recipe } from '../recipe.model';
 })
 export class RecipeListComponent implements OnInit, OnDestroy {
 
-  subscription: Subscription;
+  recipesSub: Subscription;
   recipes: Recipe[];
 
   constructor(private recipesService: RecipesService, private router: Router) { }
 
   ngOnInit() {
     // load the initial recipes
-    this.recipes = this.recipesService.getRecipes();
-
-    // subscribe to reload recipes when they change
-    this.subscription = this.recipesService.recipesChanged.subscribe(() => {
-      this.recipes = this.recipesService.getRecipes();
-    });
+    this.recipesSub = this.recipesService.getRecipesObs().subscribe(
+      (recipes: Recipe[]) => {
+        this.recipes = recipes;
+      }
+    );
   }
 
   ngOnDestroy() {
-    this.subscription.unsubscribe();
+    this.recipesSub.unsubscribe();
   }
 
   onNewRecipeClick() {

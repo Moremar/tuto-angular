@@ -20,6 +20,8 @@ import { ShoppingListReducer } from './shopping-list/store/shopping-list.reducer
 import { AuthReducer } from './auth/store/auth.reducer';
 import { AuthEffects } from './auth/store/auth.effects';
 import { environment } from 'src/environments/environment';
+import { RecipesReducer } from './recipes/store/recipes.reducer';
+import { RecipesEffects } from './recipes/store/recipes.effects';
 
 
 /* If no custom routing module, add the routes here  */
@@ -53,15 +55,16 @@ import { environment } from 'src/environments/environment';
     AppRoutingModule,
     // Redux store module, taking a map of store section/reducers
     StoreModule.forRoot({
+      recipes: RecipesReducer,
       shoppingList: ShoppingListReducer,
       auth: AuthReducer
     }),
     // Redux module for handling side-effects
-    EffectsModule.forRoot([AuthEffects]),
+    EffectsModule.forRoot([AuthEffects, RecipesEffects]),
     // Module to see the Redux store in Chrome plugin
     StoreDevtoolsModule.instrument({ logOnly: environment.production }),  // if prod, only log
     // Module to trigger a Redux Action on angular router navigation
-    StoreRouterConnectingModule.forRoot(),
+    // StoreRouterConnectingModule.forRoot(),
   ],
   providers: [{
     provide: HTTP_INTERCEPTORS,

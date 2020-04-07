@@ -1,103 +1,89 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Subject } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Router } from '@angular/router';
+import { Store } from '@ngrx/store';
+import { map, take } from 'rxjs/operators';
 
 import { Recipe } from './recipe.model';
-import { Ingredient } from '../shared/ingredient.model';
+import { AppState } from '../app.state';
+import { RecipesState } from './store/recipes.reducer';
+import { CreateRecipeAction, UpdateRecipeAction, DeleteRecipeAction,
+  EffectFirebasePersistDeleteRecipesAction, EffectFirebaseLoadRecipesAction } from './store/recipes.actions';
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class RecipesService {
 
-  // must append ".json" to the endpoint for Firebase to know how to save it
-  // the auth token is added to the request by the AuthInterceptor
-  private firebaseUrl = 'https://myrecipes-6270c.firebaseio.com/recipes.json';
-
-  private recipes: Recipe[] = [
-    new Recipe(0,
-        'Pate de campagne',
-        'Traditional french pork pate recipe !',
-        '../../assets/images/pate-de-campagne.jpeg',
-        [ new Ingredient('Bread', 2), new Ingredient('Pate', 4) ]),
-    new Recipe(1,
-        'Chicken Sandwich',
-        'Fresh baguette with delicious chicken slices !',
-        '../../assets/images/chicken-sandwich.jpeg',
-        [ new Ingredient('Bread', 2), new Ingredient('Chicken', 1) ]),
-    new Recipe(2,
-        'Roasted Chicken',
-        'A full roasted chicken with small potatoes !',
-         '../../assets/images/poulet-roti.jpg',
-         [ new Ingredient('Potatoes', 5), new Ingredient('Chicken', 1) ])
-  ];
+  constructor(
+    private router: Router,
+    private store: Store<AppState>) {}
 
 
-  // alert when the recipes changed, subscribe to it to react
-  recipesChanged = new Subject<void>();
-
-
-  constructor(private http: HttpClient) {}
-
-  getRecipes() {
-    // get a snapshot of the recipes (read-only)
-    return this.recipes.slice();
-  }
-
-  getRecipe(id: number) {
-    for (const recipe of this.recipes) {
-      if (recipe.id === id) {
-        return recipe.clone();
+  // observable on the recipes in Redux
+  getRecipesObs() {
+    return this.store.select('recipes').pipe(map(
+      (state: RecipesState) => {
+        return state.recipes;
       }
-    }
-    // invalid ID, return an empty recipe
-    console.log('ERROR : No recipe with ID = ' + id);
-    return new Recipe();
+    ));
   }
 
-  getNextId() {
-    let maxId = -1;
-    for (const recipe of this.recipes) {
-      if (recipe.id > maxId) {
-        maxId = recipe.id;
-      }
-    }
-    return maxId + 1;
+
+  // Fetch the recipe with a given ID from Redux
+  // It is a one-time observable so no need to unsubscribe
+  getRecipeObs(id: number) {
+    return this.getRecipesObs().pipe(
+      take(1),
+      map(
+        (recipes: Recipe[]) => {
+          for (const recipe of recipes) {
+            if (recipe.id === id) {
+              return recipe;
+            }
+          }
+          console.error('No recipe found with ID = ' + id);
+          return new Recipe();
+        }
+      )
+    );
   }
 
-  createRecipe(recipe: Recipe): number {
+
+  createRecipe(recipe: Recipe) {
+    console.log('Creating a new recipe.');
     if (recipe.id === -1) {
-      recipe.id = this.getNextId();
-      this.recipes.push(recipe);
-      this.recipesChanged.next();
-      return recipe.id;
+      this.getRecipesObs().pipe(take(1)).subscribe(
+        (recipes: Recipe[]) => {
+          let maxId = -1;
+          for (const currRecipe of recipes) {
+            if (currRecipe.id > maxId) {
+              maxId = currRecipe.id;
+            }
+          }
+          recipe.id = maxId + 1;
+          this.store.dispatch(new CreateRecipeAction(recipe));
+          this.router.navigate(['/recipes', recipe.id]);
+        }
+      );
     } else {
-      console.log('ERROR : The new recipe must have an ID of -1');
+      console.error('The new recipe must have an ID of -1');
     }
   }
+
 
   updateRecipe(recipe: Recipe) {
-    for (let i = 0; i < this.recipes.length; i++) {
-      if (this.recipes[i].id === recipe.id) {
-        this.recipes[i] = recipe;
-        this.recipesChanged.next();
-        return;
-      }
-    }
-    console.log('ERROR: No recipe to update with ID = ' + recipe.id);
+    console.log('Updating recipe ' + recipe.id);
+    this.store.dispatch(new UpdateRecipeAction(recipe));
+    this.router.navigate(['/recipes', recipe.id]);
   }
 
+
   deleteRecipe(recipeId: number) {
-    for (let i = 0; i < this.recipes.length; i++) {
-      if (this.recipes[i].id === recipeId) {
-        this.recipes.splice(i, 1);
-        this.recipesChanged.next();
-        return;
-      }
-    }
-    console.log('ERROR: No recipe to delete with ID = ' + recipeId);
+    console.log('Deleting recipe ' + recipeId);
+    this.store.dispatch(new DeleteRecipeAction(recipeId));
   }
+
 
   /*
    * Simplistic way to persist recipes in Firebase :
@@ -107,74 +93,20 @@ export class RecipesService {
    * (since we would lose all recipes if crash between the delete and the put)
    */
   persistRecipes() {
-    console.log('Get recipes from Firebase.');
-
-    // delete all existing recipes in Firebase
-    const deleteReq = this.http.delete(this.firebaseUrl);
-    deleteReq.subscribe(
-      /* Success callback */
-      (data: null) => {
-        console.log('Deleted all recipes from Firebase.');
-        // need to save recipes AFTER deletion of existing ones
-        // so it must be in the callback of the deletion
-        // (to ensure the order of the operations)
-        this.persistRecipesInFirebase();
-      },
-      /* Error callback */
-      (error: HttpErrorResponse) => {
-        console.log('Failed to delete all recipes from Firebase :');
-        console.log(error);
+    console.log('Persisting recipes to Firebase');
+    this.getRecipesObs().pipe(take(1)).subscribe(
+      (recipes: Recipe[]) => {
+        this.store.dispatch(new EffectFirebasePersistDeleteRecipesAction(recipes));
       }
     );
   }
 
-  private persistRecipesInFirebase() {
-    // Save 1 by 1 all recipes in Firebase
-    // The "recipes" folder is created in Firebase if missing
-    for (const recipe of this.recipes) {
-      const postReq = this.http.post(this.firebaseUrl, recipe);
-      postReq.subscribe( (data: {name: string}) => {
-        console.log('Posted recipe ' + recipe.id + ' :');
-        console.log(data);
-      });
-    }
-  }
 
   /*
    * Replace the local recipes array by the recipes stored in Firebase
    */
   loadRecipes() {
-    this.http.get(this.firebaseUrl)
-        /* Convert the data to get a nice array of recipes */
-        .pipe(map((data: {[key: string]: Recipe}) => {
-          const recipes: Recipe[] = [];
-          for (const key in data) {
-            if (data.hasOwnProperty(key)) {
-              /* Create new to have a real Recipe with clone() method */
-              const ingredients: Ingredient[] = [];
-              if (data[key].hasOwnProperty('ingredients')) {
-                for (const ing of data[key].ingredients) {
-                  /* Make a real Ingredient so it has the clone() method */
-                  ingredients.push(new Ingredient(ing.name, ing.amount));
-                }
-              }
-              recipes.push(new Recipe(
-                data[key].id,
-                data[key].name,
-                data[key].description,
-                data[key].imagePath,
-                ingredients,
-              ));
-            }
-          }
-          return recipes;
-        }))
-        .subscribe(recipes => {
-          console.log(recipes);
-          this.recipes = recipes.sort(
-            (r1, r2): number => r1.id - r2.id
-          );
-          this.recipesChanged.next();
-        });
+    console.log('Loading recipes from Firebase');
+    this.store.dispatch(new EffectFirebaseLoadRecipesAction());
   }
 }
