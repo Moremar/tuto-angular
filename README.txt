@@ -1566,6 +1566,24 @@ Loading.io
 A nice website offering some spinners (HTML and CSS).
 We can create a component with this copy/pasted code to have a ready to use spinner component.
 
+Angular Universal
+-----------------
+
+The code of an Angular app contains only the <app-root> component and a bunch of scripts.
+This works well for the user but is not easily understood by search engines.
+Angular Universal lets us create a server that pre-renders our pages and sends them to the
+browser (with the full HTML structure) for the search engines to be able to parse it.
+Guide : https://github.com/angular/angular-cli/wiki/stories-universal-rendering
+
+It requires to :
+ - import some new dependencies (especially angular platform for building server side app)
+ - add a new module for the server side
+ - add some config in angular.json to allow a "server" build command
+ - import express and create a "server.ts" express server side process
+ - convert it to JS with webpack
+
+ This can no longer be served by a static files web server (like AWS S3).
+ It needs a web server that can execute a node.js app (to run the server.js file).
 
 Firebase
 --------
