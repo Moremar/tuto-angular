@@ -4,7 +4,7 @@ import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
-import { StoreRouterConnectingModule } from '@ngrx/router-store';
+// import { StoreRouterConnectingModule } from '@ngrx/router-store';  // used to trigger redux actions on routing
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -46,12 +46,14 @@ import { RecipesEffects } from './recipes/store/recipes.effects';
     // if no custom routing module and "routes" array in this file :
     // RouterModule.forRoot(routes)
     // else add the custom routing module AppRoutingModule
-    // if we have feature modules with child routes, add them first
-    // so they are included before the "not found" route !
+    // if we have feature modules with child routes, add them first (for example ShoppingListModule here)
+    // so they are included before the ** route that would shadow them!
     SharedModule,
 //    RecipesModule,
+    // module for shopping-list related features
     ShoppingListModule,
     AuthModule,
+    // custom module for routing
     AppRoutingModule,
     // Redux store module, taking a map of store section/reducers
     StoreModule.forRoot({

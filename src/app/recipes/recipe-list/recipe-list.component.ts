@@ -18,7 +18,7 @@ export class RecipeListComponent implements OnInit, OnDestroy {
   constructor(private recipesService: RecipesService, private router: Router) { }
 
   ngOnInit() {
-    // load the initial recipes
+    // load the recipes everytime they change
     this.recipesSub = this.recipesService.getRecipesObs().subscribe(
       (recipes: Recipe[]) => {
         this.recipes = recipes;

@@ -9,8 +9,8 @@ Download required tools :
 - Install Node.js (including NPM)
 - Install Angular/CLI :     npm install @angular/cli -g
 - Install typescript  :     npm install typescript -g
-  This install globally the tsc command (transcript compiler) to transpile TS into JS.
-  Transpile TS to JS :      tsc myfile.ts
+  This installs globally the tsc command (transcript compiler) to transpile TS into JS.
+  Transpile TS to JS :      tsc myfile.ts  (no need to actually do that, Angular does it automatically)
   Execute JS code :         node myfile.js
 
 Download Visual Studio Code IDE :
@@ -22,6 +22,7 @@ Debug tools :
 - Chrome console
 - Chrome developer tool to put breakpoints in the TS code (thanks to sourceMaps between JS and TS)
 - Augury (Chrome extension) that shows the state of each Angular component of the app
+- Redux DevTools (Chrome extension) to debug Redux state and actions
 
 
 ANGULAR CLI
@@ -65,7 +66,7 @@ WHAT IS ANGULAR ?
 - builtin backend integration
 - complete rewrite of its predecessor AngularJS
 
-An Angular App is composed of several elements :
+An Angular app is composed of several elements :
  - components  : representing one element of the app (TS + HTML + CSS)
  - modules     : grouping building blocks (components, services, directives ...) by functionality
                  Small apps may have only one module.
@@ -77,7 +78,7 @@ An Angular App is composed of several elements :
 A component is made of :
 - a template : HTML file representing the component view
                It can contain references to properties / methods from the TS class
-               Those reference are between {{ ... }}, this is called 'data-binding'
+               Those references are between {{ ... }}, this is called 'data-binding'
 - a TS class : TS file defining the behavior of the component (properties + methods)
 - metadata   : additional info about the component for Angular, defined with a decorator
                The class decorator is @Component(), and contains :
@@ -104,15 +105,16 @@ Services are usually included app-wide with the "providedIn" prop set to "root",
 do not appear in the module definition.
 A frequent module is app-routing.module.ts in charge of the routing.
 
-Some modules are provided built-in in Angular, for example the FormsModule containing the ngModel directive.
+There are some built-in Angular modules, for example the FormsModule containing the ngModel directive.
 All modules we use in our app (custom and builtin) must be listed in the "imports" of AppModule (or of
-the feature module usniig them).
+the feature module using them).
 When we import a module, we basically import everything this module exports.
 Everything else the module declares but does not export is not accessible.
-That is why the AppRoutingModule updates the RouterModule, and then exports it, so AppModule imports it and has routing.
+That is why the AppRoutingModule updates the RouterModule, and then exports it, so AppModule imports it
+and can use routing.
 
-To create a feature module, we just need a TS class with NgModule() decorator and the folowing props :
-- "declarations" : all components that belong to this module (each component iis declared in a single module)
+To create a feature module, we just need a TS class with NgModule() decorator and the following props :
+- "declarations" : all components that belong to this module (each component is declared in a single module)
 - "imports" :      modules containing some components used in the module (AppRoutingModule, FormsModule,...)
                    must always contain CommonModule (or a module exporting it, like a custom SharedModule).
 - "exports" :      all components that we want to make available to other modules importing this module
@@ -156,7 +158,7 @@ An Angular app is a single page application. It serves the HTML file "index.html
 This file will contain our "app-root" component, that will contain all our app.
 
 When we run "ng serve", the Angular CLI groups our custom code (all our components) into JS bundles
-and add it at the end of the served index.tml.
+and adds it at the end of the served index.html.
 The first code to be executed is main.ts, that bootstraps the AppModule.
 The AppModule contains a "bootstrap" property equal to [ AppComponent ], so Angular knows that the app
 must load this component at startup, and it can then replace it in the index.html.
@@ -176,7 +178,7 @@ This will generate under the dist/ folder a few files that we can deploy to run 
 These files are a shrinked version of our app code.
 
 After the artifacts (generated files) are built, we get only HTML / CSS / JS code.
-This can thus be deployed to a static website host that deliver only HTML/CSS/JS.
+This can thus be deployed to a static website host that delivers only HTML/CSS/JS.
 Popular options are :
   - AWS S3 (need AWS account)
   - Firebase Hosting (completely independant from the Firebae DB we use in the project)
@@ -208,8 +210,8 @@ website : https://firebase.google.com/docs/hosting
 Note 1 : "Ahead of Time" compilation
          ---------------------------
 When running "ng serve -o", we are running a web server and shipping the Angular compiler in the app.
-Everytime we query some component, the compiler will be called in the browser to convert Angular templates into JS code.
-This is called "Just In Time" compilation, which is great for debugging.
+Everytime we query some component, the compiler will be called in the browser to convert Angular templates
+into JS code. This is called "Just In Time" compilation, which is great for debugging.
 In prod we want to pre-compile to JS and not ship the Angular compiler, this is "Ahead of Time" compilation.
 It is stricter than the "Just In Time" compiler used in debug, so new compilation errors can occur :
  - If some TS code is not understood in the template, we can move it to a function in the TS
@@ -289,8 +291,9 @@ SERVICES
 Services in Angular are TS classes that can be used from any component or services.
 Typical usecases are logging, data management or HTTP requests to the backend.
 
-There is no @Service() decorator, but we can use the @Injectable() decorator.
-It is technically required only if the service injects other services in its constructor.
+There is no @Service() decorator, but we use the @Injectable() decorator.
+It is technically required only if the service injects other services or components in its constructor,
+but it is a good practice to always add it (since we may inject something in it later).
 
 Angular can inject an instance of a service in a component from its constructor.
 The service needs to be specified in the "providers" list property of the @Component() decorator
@@ -306,14 +309,12 @@ This is very important for services sharing data, they need to be injected in th
 all components use the same instance.
 
 If the service is provided at module level, it can also be injected in services.
-To inject a service in another service, the service that needs injection needs to use decorator @Injectable();
-It is not required for other services, but it is a good practice to put it on all services.
 
 In the @Injectable() decorator we can add :  { providedIn: 'root' }
 This automatically provides the service at module level (no need to add it in the module ourselves).
 
 Services can be used for inter-component communication.
-This is much simpler than passing around information from component to component with @Input()/@Output() chains.
+This is much simpler than passing around data from component to component with @Input()/@Output() chains.
 
  - in the service, create a property of type EventSubmitter :
      statusUpdated = new EnventSubmitter<string>();
@@ -418,7 +419,7 @@ Then we need to import the router module and give it the routes :
   ]
 
 Then in the HTML component where we want routing (most likely in app.component.html), we need to add an
-Angular directive to display the ccomponent of the selected route :
+Angular directive to display the component of the selected route :
   <router-outlet><router-outlet>
 
 
@@ -431,9 +432,9 @@ Instead we use the "routerLink" directive, that can take either a string or an a
   <a routerLink="/users"> XXX </a>
   <a [routerLink]="['/users', '123']"> XXX </a>    // route to localhost:42000/users/123
 
-To style our links when they are active, Angular offers the "routerLinkActive" directive that can receive a class
-to attach to the element when it is active. This directive can be attached both to the <a> or to the <li>
-containing it.
+To style our links when they are active, Angular offers the "routerLinkActive" directive that can
+receive a class to attach to the element when it is active.
+This directive can be attached both to the <a> or to the <li> containing it.
 With Bootstrap CSS, we need to attach the "active" class to the containing <li>.
 By default the routerLinkActive class will be attached if the path is included in the current path.
 This is an issue for the root path "/" (usually used for Home) that is included in all routes.
@@ -448,7 +449,7 @@ To navigate to a route programatically, we can inject the Router element in the 
   this.router.navigate(['/users', '123']);
 
 If we want to programatically navigate to a relative route, we need to specify it to Angular.
-Inject the current active route of type ActivatedRoute in the constructor, and pass it to the navigate() method :
+Inject the current route of type ActivatedRoute in the constructor, and pass it to the navigate() method :
   this.router.navigate(['users', '123'], {relativeTo: this.activatedRoute});
 
 Router parameters
@@ -637,13 +638,13 @@ They get transformed by Angular into valid HTML code without the star.
 
 - Conditional tag :  *ngIf
   Take a boolean, display the tag if the TS results to true.
-  <p *ngIf="shouldBeThere"> XXX </p>
+  <p *ngIf="shouldDislay"> XXX </p>
   Weird syntax if we want a if/else :
     <p *ngIf="shouldDislay; else #other"> XXX </p>
     <ng-template #other> <p> YYY </p> </ng-template>
 
  Behind the scene, Angular will transform it into :
-  <ng-template [ngIf]="shouldBeThere"> <p> XXX </p> </ng-template>
+  <ng-template [ngIf]="shouldDisplay"> <p> XXX </p> </ng-template>
 
 - Selection of a tag among several : ngSwitch / *ngSwitchCase / *ngSwitchDefault
   Only the options of the switch take a * :
@@ -665,7 +666,7 @@ They get transformed by Angular into valid HTML code without the star.
    <p [ngStyle]="{backgroundColor: getColor()}"> XXX </p>
 
 - Dynamic classes: ngClass
-  Take a dict of string/boolean, to decide if each class is assiciated to the tag.
+  Take a dict of string/boolean, to decide if each class is associated to the tag.
    <p [ngClass]="{online: isOnline()}"> XXX </p>
 
 
@@ -674,7 +675,7 @@ Custom Attribute Directives
 
 We can also create our own directives, as a TS class with the @Directive() decorator.
 The directive needs to be added in the "declarations" of the module for Angular to know it.
-The reference of the element that uses this directive can be injected from the constructor between [ ... ] :
+The reference of the element that uses this directive can be injected from the decorator between [ ... ] :
 
 @Directive({ selector: '[appBasicHighlight]' })
 export class BasicHighlightDirective implements OnInit {
@@ -803,7 +804,7 @@ From TS, we can access this NgForm object with a "value" attribute containing th
   }
 
 An alternative is to not pass a parameter to onSubmit(), but in the component get the form with @ChildView().
-It is useful if we want to access the content of the form from outside the form :
+It is useful if we want to access the content of the form from outside the form submit function :
   @ChildView('myForm') myForm: NgForm;
 
 Validation
@@ -823,7 +824,7 @@ Angular also adds some CSS classes to the controls depending on their status :
  - ng-touched  (it was clicked but not necessarily modified)
  - ng-untouched
 This lets us style invalid inputs for example :
-  input.ng-invalid.ng-untouched { border: solid 1px red; }
+  input.ng-invalid.ng-touched { border: solid 1px red; }
 
 We can also add an error message displayed only if the input is invalid.
 This requires to give a local reference to the input of type ngModel :
@@ -908,7 +909,7 @@ representation that Angular creates automatically.
 We need to import the ReactiveFormsModule inside out app.module.ts (instead of FormsModule).
 Then we define a property "myForm" of type FormGroup (the NgForm is actually a wrapper above it).
 We can populate it in the ngOnInit(), by defining the controls of the form.
-In here there is no difference between input / select / radio inputs.
+In here there is no difference between input / select / radio controls.
 We can have a tree structure by adding other FormGroup elements inside the root FormGroup.
 
   ngOnInit() {
@@ -983,7 +984,7 @@ Using error codes
 -----------------
 
 The error code is saved in the JS form object inside the component that causes the error.
-This can be used to display a custome validation message depending on the error :
+This can be used to display a custom validation message depending on the error :
 
     <input type="text" class="form-control" [formControlName]="i" />
     <span *ngIf="myForm.get('username').touched && !myForm.get('username')">
@@ -998,7 +999,7 @@ An asynchronous validation can be added (reach out to backend via HTTP for ex) :
 
   nameForbidden(control: FormControl): Promise<any> | Observable<any> {
     const promise = new Promise<any>( (resolve, reject) => {
-      setTimeout(() => {     // jsut to simulate a time-consuming function
+      setTimeout(() => {     // just to simulate a time-consuming function
         if (control.value == John'') {
           resolve({ 'forbiddenName': true});
         } else {
@@ -1018,7 +1019,7 @@ PIPES
 
 Pipes can be used to transform some data in the output.
 They are used with string interpolation to transform the value resolved in TS :
- {{ 'Hello' | uppercase }}     // will show HELLO
+ {{ 'Hello' | uppercase }}     //  HELLO
 
 There are some built-in pipes :
   uppercase
@@ -1127,7 +1128,7 @@ We can change this behavior to get the full response (with headers, response cod
   - 'response' : full HTTP response
   - 'events'   : catches all messages going out an in, they are "events" with a type (HttpEventType enum)
                  for ex type 0 is "Sent", type 4 is "Response" and is the actual HttpResponse.
-                 THis is the most fine-grain level of observation.
+                 This is the most fine-grain level of observation.
 
   this.get(url, { observe: 'response' })
       .subscribe( (response: HttpResponse) => { ... } );
@@ -1198,23 +1199,23 @@ Many apps use sessions for authentication.
 Session are an object that is created in the backend once the user enters his credentials.
 The backend then "knows" the client as long as the session is open.
 
-With Angular we cannot use this mechanism, since frontend and backend are totallyy decorrelated.
+With Angular we cannot use this mechanism, since frontend and backend are totally decorrelated.
 They only communicate via HTTP calls.
 
 In Angular, once the client sends the credentials, the backend will generate a token from them,
 encode it with a secret key only the backend knows, and sends it to the Angular frontend.
-Every time the client sends a request that needs authentication, it will attache this token.
-The backend will then validate that it is correct, and if it is accept to execute the request.
+Every time the client sends a request that needs authentication, it will attach this token.
+The backend will then validate that it is correct, and execute the request.
 
 The backend needs to have an HTTP endpoint to create a user, and to get a token for an existing user.
-We can use Firebase that provides this service out-of-the box without writing our own backend.
+We can use Firebase that provides this service out-of-the-box without writing our own backend.
 
 The Angular app must have a login form allowing the user to :
  - create an account
  - login with an existing account
- - log out
+ - logout
 
-It should then communicate with an Auth service that handles the sign up / log in / log off.
+It should then communicate with an auth service that handles the signup / login / logout.
 
 If we want to store the auth token so that it is read when the page reloads, we need to use either
 cookies or local storage (an API controlled by the browser to store key/val pairs on the file system).
@@ -1233,10 +1234,12 @@ DYNAMIC COMPONENTS
 ------------------
 
 We can load some components dynamically in our app, to create some modals or popups for example.
-One way to do it is to use *ngIf on a component with a backdrop, and to set the condition in code to show/hide it.
+One way to do it is to use *ngIf on a component with a backdrop, and to set the condition in code to
+show/hide the component.
 It is the easiest solution so it should be used when possible.
 
-A more complex approach is to create the component, attach it in the DOM and remove it from the DOM ourselves from code.
+A more complex approach is to create the component, attach it in the DOM and remove it from the DOM
+ourselves from code.
 
 We need a method in the TS code to instanciate our component.
 We cannot just use "new MyComponent()" because Angular needs more than just instantiation.
@@ -1246,8 +1249,10 @@ Inject the ComponentFactoryResolver in the constructor, then instantiate the com
   const factory = this.componentFactoryResolver.resolveComponentFactory(MyComponent);
 
 This factory needs to know where to create the component, which is given by a view container ref.
-It is obtained by creating a directive, inject in it the "ViewContainerRef" and make it a public porperty of the directive.
-Doing so, we can set this property to a <ng-template> in the HTML and access its view container ref to create the component here.
+It is obtained by creating a directive, inject in it the "ViewContainerRef" and make it a public
+property of the directive.
+Doing so, we can set this property to a <ng-template> in the HTML and access its view container ref
+to create the component here.
 
 @Directive({
   selector: '[appPlaceholder]'
@@ -1268,7 +1273,7 @@ And use it to create a component dynamically :
     const factory = this.factoryResolver.resolveComponentFactory(AlertComponent);
     const viewContainerRef = this.errorModalTemplate.viewContainerRef;
     viewContainerRef.clear();
-    const newComponentRef = viewContainerRef.createComponent(factory);
+    const modalRef = viewContainerRef.createComponent(factory);
 
 For this to work, we need to let Angular know that this component will be created dynamically.
 This is done by registering it in the "entryComponents" property of the module :
@@ -1284,10 +1289,16 @@ Then we can set the input and output bindings by using the "instance" of the new
     );
 
 
+ANIMATIONS
+----------
+
+
+
+
 STATE MANAGEMENT WITH REDUX
 ---------------------------
 
-Application state contains all not-persistent information used to know what should
+Application state contains all non-persistent information used to know what should
 be displayed (loading, tab selected, just sent a file, ...).
 We can handle state only with services and components, by having a service that publish
 state change (with a Subject) and components subscribing to it.
@@ -1298,7 +1309,7 @@ code easier to read and maintain. We can use Redux for this.
 Redux is a pattern to manage state, using a central JS object called "store" that will
 be the source of truth for services/components regarding the application state.
 
-To update the state (for ex add a recipe), we cannot modify the store directly.
+To update the state (for ex to add a recipe), we cannot modify the store directly.
 We need to create an action that defines how to change the store, and add an optional payload.
 This action is processed by a "reducer" that will calculate the resulting state, and will
 overwrite the current store with the new state.
@@ -1343,8 +1354,10 @@ Create a file xxx.reducer.ts and define a reducer function :
 
 Store
 -----
-Import in the app.module.ts the StoreModule and list its reducers :
+Import in the app.module.ts the StoreModule and list its reducers.
+USually there would be one reducer function per section of our app :
     StoreModule.forRoot({ shoppingList: ShoppingListReducer })
+
 With this setup, NgRx creates an application store with the given reducers.
 We can access it by injecting in a module/component an object of class Store.
 Store is generic, and needs to specify the actual full type of the store :
@@ -1450,14 +1463,14 @@ this.route.params.subscribe(
   ()               => { console.log("Completed"); },
 );
 
-If we create our own Observables, we need to unsubscribe from them in the OnDestroy().
-Otherwise the will keep reacting on the observable changes, causing memory leaks.
-We do not  need to unsubscribe from Angular-specific observables though, because
-Angular automatically unsubscribe from them.
+If we create and subscribe to our own Observables, we need to unsubscribe from them in the OnDestroy().
+Otherwise they will keep reacting to the observable changes, causing memory leaks.
+We do not  need to unsubscribe from Angular-specific observables (like activatedRoute.params), because
+Angular automatically unsubscribe from them (but it doesn't hurt if we do).
 
 We can use an "operator" to modify the data received by an observable before we get it.
 This is done by calling pipe() on the observable, applying some pipe operators and subscribing to their result.
-The most popular operator are :
+The most popular pipe operators are :
 
 - map() that lets us give a function to apply to the data :
 
@@ -1466,21 +1479,21 @@ this.route.params
     .subscribe( (data) => { console.log(data); } )
 );
 
-- tap() that lets us run a function without altering the data
-  It returns nothing, and can be used for analytics or logging
+- tap() that lets us run a function without altering the data.
+  It returns nothing, and can be used for analytics or logging.
 
 - filter() that lets us select only the data we want to receive :
 
 this.route.params
-    .pipe(filter( (data) => { return (+data < 3); } ))
+    .pipe(filter( (data) => { return (+data < 5); } ))
     .subscribe( (data) => { console.log(data); } )
 );
 
 - take(n) lets rxjs know that we want only n values from that observable.
-  once we received the desired number of values, it automatically unsubscribes.
+  Once we received the desired number of values, it automatically unsubscribes.
 
-- catchError() that lets us process any error sent by the observable.
-  it should throwError(error) if it wants to forward the error
+- catchError() lets us process any error sent by the observable.
+  It should throwError(error) if it wants to forward the error.
 
 Subjects
 --------
@@ -1491,8 +1504,8 @@ In the service  :  eventSubject = new Subject<boolean>();
 In the caller   :  this.myService.eventSubject.next(true);
 In the listener :  this.myService.eventSubject.subscribe((event: boolean) => { ...} );
 
-Like every Observable, the listener must unsubscribe in his OnDestroy hook.
-We should use them insted of EventEmitter for inter-components communication via a service,
+Like every Observable, the listener must unsubscribe in his onDestroy() hook.
+We should use them instead of EventEmitter for inter-components communication via a service,
 but it can not replace the EventEmitter in the @Output() Angular decorator.
 
 We can also use BehaviorSubject objects, that are similar to Subjects but we can access the
@@ -1503,7 +1516,7 @@ last emitted value even if we subscribe after it was emitted.
 USEFUL TOOLS
 ------------
 
-Visual studio Code
+Visual Studio Code
 ------------------
 
 Free IDE with good Angular support.
@@ -1518,7 +1531,7 @@ Bootstrap
 ---------
 
 Bootstrap offers a large selection of CSS classes to style our components easily.
-Install locally and save to package,json with :
+Install locally and save to package.json with :
 npm install --save bootstrap@3
 npm install --save jquery
 
@@ -1532,25 +1545,23 @@ Then update the "styles" and "scripts" arrays in angular.json :
 	  "node_modules/bootstrap/dist/js/bootstrap.js"
 	]
 
-Useful class provided by bootstrap :
+Useful classes provided by bootstrap :
 
   container          space above and below, fixed width (depending on screen size), 15px padding
-  container-fluid    space above and below, 100% width, 15 px padding
+  container-fluid    space above and below, 100% width, 15px padding
 
   Grid structure (up to 12 columns) :
-    row              fills 100% of the container
+    row              fill 100% of the container
     col              let Bootstrap decide the size, all cols will have the same width
     col-sm-3         use 3 columns out of the 12 available, sm is for small screens support
                      when getting too small, the columns will stack on each other
 
   form-controler    set size and width of a text input
   btn               empty button with size and radius
-  btn-primary       blue color button (completes btn)
+  btn-primary       blue color button (use in addition to "btn")
   text-white        Write the text in white
   bg-XXX            colored bg, XXX can be primary/success/info/warning/danger/secondary/white/dark/light
   text-XXX          colored text, XXX can be the same as above
-  bg-dark           grey background
-  bg-primary        blue background
 
   Bootstrap customizes some html tags :
   <h1> to <h6>      specific font + size
@@ -1591,18 +1602,19 @@ Firebase
 In a real app, the backend can be in C++ / Java / Node / Python.
 To simulate the backend, we can use Firebase, a Google backend-as-a-service solution.
 It offers a lot of backend functionalities (authentication, database, storage, REST API).
-We will just use here the REST API to define HTTP endpoints for our Angular app.
-We will create a Firebase project, which is a container for several apps sharing backend (iOS / Android / web).
+We only use in this project the REST API to define HTTP endpoints for our Angular app and the
+authntication solution generating auth tokens.
+We create a Firebase project, which is a container for several apps sharing backend (iOS / Android / web).
 A Firebase project is actually creating a Google Cloud Platform (GCP) project behind the scene.
 
 We will use Firebase Realtime database, it is a database that stores and gets objects directly via HTTP calls.
 When sending a POST, it is interpreted by Firebase to add an element in a folder of this database.
 
 - open the Firebase Console
-- Click "Create a Project" and give it a name ("myRecipes" in my example)
+- Click "Create a Project" and give it a name ("myRecipes" in this example).
 - Once the project is created, we are on the overview dashboard of the project.
-- Go to Develop > Database > Create Real-time database (not Cloud Firestore)
-  Click "Set test mode" to allow anyone to do anything in the DB (later we will use authentication)
+- Go to Develop > Database > Create Real-time database (not Cloud Firestore).
+  Click "Set test mode" to allow anyone to do anything in the DB (later we will use authentication).
 
 Data tab:
 It creates a database and provides us with a base URL : https://mytest-4d456.firebaseio.com/
