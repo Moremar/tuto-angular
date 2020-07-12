@@ -24,6 +24,11 @@ Debug tools :
 - Augury (Chrome extension) that shows the state of each Angular component of the app
 - Redux DevTools (Chrome extension) to debug Redux state and actions
 
+Start project :
+   ng serve -o
+
+Login credentials : aaa@bbb.ccc / aaaaaa
+
 
 ANGULAR CLI
 -----------
@@ -1289,10 +1294,78 @@ Then we can set the input and output bindings by using the "instance" of the new
     );
 
 
-ANIMATIONS
+ANIMATIONS (Angular 2, it may have changed)
 ----------
 
+Angular can handle animations between states.
+The @Component() decorator can take a "animations" property, that lets us define :
+  - a trigger (property of a div in the component giving the current state)
+  - the possible states of the component and their style
+  - how to transition from one state to another
 
+In the HTML code of the component, we should have one div with the "divState" trigger (using a @) linked
+to a state property of the component :
+<div [@divState]="state">
+
+In the TS code of the component we must have the "state" property either equal to "normal" or "highlighted".
+We can have a function to flip the state from normal to highlighted state.
+
+In the @Component() constructor we define the animations :
+
+@Component(
+  selector: '...',
+  template-url: '...',
+  animations: [
+    trigger('divState',[               <-- trigger name
+      state('normal', style({          <-- NORMAL state definition
+        backgroundColor: 'red',
+        transform: 'translateX(0)'
+      })),
+      state('highlighted', style({     <-- HIGHLIGHTED state definition
+        backgroundColor: 'blue',
+        transform: 'translateX(100)'
+      })),
+      transition('normal => highlighted', animate(300)),    <-- quick transition
+      transition('highlighted => normal', animate(500)),    <-- slow transition
+    ])
+  ]
+)
+
+If we now create a button that flips the "state" property of the component from "normal" to "highlighted",
+we should see the transition handled by Angular.
+
+The above transitions are direct transitions from one state to another.
+We can also dedfine some intermediary phases of the transition.
+These phases are not a real state (since it is not a final state the component can be in) but just a
+temporary styling during the transition.
+To do so, use an array as the 2nd param of the transition with one item per phase :
+
+      transition('highlighted => normal', [
+          style({                           <-- instant change
+            backgroundColor: 'orange'
+          }),
+          animate(300, style({              <-- curve the corners in 300ms
+            borderRadius: '50px'
+          })),
+          animate(800)                      <-- then transition to the highlighted state in 800ms
+      ]),
+
+We can also have an animation when a componenet is added or removed to/from the DOM.
+For this, we use the Angular builtin "void" state that means "the component is not in the DOM".
+For example if we want the component to slowly appear and slide to its position when added :
+
+    transition('void => *', [
+      style({                   <-- set a style as soon as it appears
+        opacity: 0,
+        transform: 'translateX(-100px)'
+      }),
+      animate(800)              <-- now from this style slowly get visible and slide to its final position
+    ])
+
+Angular also offers callback we can execute when the animation starts or completes.
+These callbacks are events called @divState.start and @divState.done :
+
+<div [@divState]="state" (@divState.start)="onAnimationStart($event)"> ... </div>
 
 
 STATE MANAGEMENT WITH REDUX
@@ -1447,6 +1520,76 @@ To use it, install the router store package :
 Then add in the imports of the app.module.ts :
       StoreRouterConnectingModule.forRoot(),
 Now after "ng serve" the redux chrome extension should show an action at every routing event.
+
+
+SERVICE WORKER
+--------------
+
+In Angular, we can configure a service worker running on another thread and intercepting outgoing and incoming
+HTTP requests.
+This is the thread that can send push notifications in a mobile app for instance.
+In our Angular app, we can use it to cache the response of HTTP requests so we can serve them again
+if we have no internet connection.
+
+It needs to be installed with the CLI with :  ng add @angular/pwa
+This creates a few files, updates the dependencies of our project and add the ServiceWorkerModule.
+
+We need to build for prod :  ng build --prod
+This creates the XXXX file in the dist folder that pecifies what the service worker should do.
+To actually run it, we need to run an HTTP server locally, we can use node server hosting the content of a folder :
+npm install -g http-server
+cd <project>/dist/<project-name>
+http-server -p 8081
+
+Now we can access our app with a browser.
+If we stop the internet connection and refresh it loads a page with the static content (instead of No Connection page).
+Dynamic elements (fetched from a server) are not displayed, since there is no logic yet to cache them.
+
+The file specifying what to cache is "ngws-config.json".
+By default it loads index.html and all CS and JS files (that are static).
+
+We can add a "urls" sction in the "resources" to cache, and specify the URL to cache.
+For example to cache a ggogle font that we use in the app :
+   "urls": [ "https://fonts.googleapis.com/css?family=Tangerine" ]
+
+If we need to cache some data from an API (dynamic data changing regularly), we need to add a "dataGroups"
+section under the "assetGroups" section.
+
+
+UNIT TESTS
+----------
+
+The CLI comes with the Jasmine test framework and the Karma test runner.
+At compoennt creation, the CLI generates a default .spec file for unit tests.
+By default it only checks that the component can be instanciated.
+To start the Karma test runner, execute the command :  ng test
+The terminal should show "Executed X of X SUCCESS", and a Jasmine HTML page shouldl open in Chrome.
+The "ng test" command is watching for changes, it re-runs the tests at every change.
+
+"TestBed" is the main class of the Angular testing module.
+We call its configureTestingModule() and its compileElements() functions in the beforeEach()
+of the test file to setup the test environment.
+Then in each test we create a component with its createComponent() function.
+
+The tests can be of 2 different types :
+ - tests for services and component classes (functions / input / output) can simply create the object,
+   change its properties or call methods and check the object
+ - tests of the DOM that need to use the "nativeElement" property of the fixture.
+   We need to call "detectChanges() before sny check to ensure the component gets updated.
+(see alert.component.spec.ts for a basic example of both)
+
+In the test, we can retrieve an injected service used in our component by calling :
+let service = fixture.debugElement.injector.get(UserService);
+
+If we need to test an async calculation (call to an external API for ex) we can :
+ - create a spy of the service and mock the async function to test (to not actually call the API)
+      let service = fixture.debugElement.injector.get(UserService);
+      let spy = spyOn(service, 'methodName').and.returnValue(Promise.resolve('XXX'));
+ - wrap the lambda function of the test into the async() function.
+   after the promise call, call fixture.detectChanges() and tell Angular to wait for the completion
+   of the async call with :
+   fixture.whenStable().then(() => { /* assertions */ });
+
 
 
 Bonus JS : Observables

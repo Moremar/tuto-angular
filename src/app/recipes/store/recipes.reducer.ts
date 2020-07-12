@@ -25,7 +25,7 @@ const initialState: RecipesState = {
       'Roasted Chicken',
       'A full roasted chicken with small potatoes !',
        '../../assets/images/poulet-roti.jpg',
-       [ new Ingredient('Potatoes', 5), new Ingredient('Chicken', 1) ])
+       [ new Ingredient('Potato', 5), new Ingredient('Chicken', 1) ])
   ]
 };
 
